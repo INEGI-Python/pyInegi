@@ -1,8 +1,21 @@
 [build-system]
-requires=["setuptool"]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
 build-backend="setuptools.buil-meta"
+dependencies = [
+    "requests",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "geopandas" 
+]
+
 
 [project]
 name="pyInegi"
 version="1.0.0"
+
+
 
