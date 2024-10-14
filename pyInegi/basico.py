@@ -22,6 +22,7 @@ def fechaHora():
   return str(t)[:-7].replace(" ","-").replace(":","")
 
 def imp(text):
+  import datetime as dt
   t = dt.datetime.today()
   print("|%s|  %s" % (str(t)[5:-5],str(text)))
 
