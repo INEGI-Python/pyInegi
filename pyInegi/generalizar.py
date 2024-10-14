@@ -41,8 +41,8 @@ def crearMapa(**capas):
 	CRS=capas['b']
 	geomDF=capas['c']
 	imp("Creando Mapa...")
-	m1=_cap["Visible"][0].explore(tooltip=False,marker_type="circle",style_kwds=dict(color=_cap['Visible'][1],weight=5,opacity=1),marker_kwds=dict(radius=4, fill=True,draggable=True),legend=False,name="Visibles",popup=True)
-	m2=_cap["Ocultas"][0].explore(m=m1,tooltip=True,marker_type="circle",style_kwds=dict(color=_cap['Ocultas'][1],weight=3,opacity=0.6),marker_kwds=dict(radius=2, fill=True),legend=False,name="Ocultas",popup=True)
+	m1=_cap["Visible"][0].explore(tooltip=True,marker_type="circle",style_kwds=dict(color=_cap['Visible'][1],weight=5,opacity=1),marker_kwds=dict(radius=4, fill=True,draggable=True),legend=False,name="Visibles",popup=True)
+	m2=_cap["Ocultas"][0].explore(m=m1,tooltip=False,marker_type="circle",style_kwds=dict(color=_cap['Ocultas'][1],weight=3,opacity=0.6),marker_kwds=dict(radius=2, fill=True),legend=False,name="Ocultas",popup=True)
 	geomDF.explore(m=m2,color="#AAF", tooltip=False,name="Poligono prueba",legend=False)
 	fol.TileLayer("OpenStreetMap",show=True).add_to(m2)
 	fol.LayerControl().add_to(m2)
