@@ -32,8 +32,8 @@ def Generar_Plot(agrupados, distancia, CRS):
 	geomDF = gpd.GeoDataFrame(geometry=geometria,crs=CRS)
 	#locas=agrupados.intersection(geomDF.union_all(),align=True)
 	#segus = agrupados.loc[locas[locas.is_empty].index,]
-	DF_visi = gpd.GeoDataFrame(data=visibles.loc[:,['nombre','gpo','num_hab']].to_dict(),geometry=[sh.Point(*list(g['geometry']['coordinates'])) for g in visibles.__geo_interface__['features']],crs=CRS)
-	DF_ocul = gpd.GeoDataFrame(data=ocultar.loc[:,['nombre','gpo','num_hab']].to_dict(),geometry=[sh.Point(*list(g['geometry']['coordinates'])) for g in ocultar.__geo_interface__['features']],crs=CRS)
+	DF_visi = gpd.GeoDataFrame(data=visibles.loc[:,].to_dict(),geometry=[sh.Point(*list(g['geometry']['coordinates'])) for g in visibles.__geo_interface__['features']],crs=CRS)
+	DF_ocul = gpd.GeoDataFrame(data=ocultar.loc[:,].to_dict(),geometry=[sh.Point(*list(g['geometry']['coordinates'])) for g in ocultar.__geo_interface__['features']],crs=CRS)
 	return DF_visi,DF_ocul,geomDF	
 
 def crearMapa(**capas):
@@ -41,8 +41,8 @@ def crearMapa(**capas):
 	CRS=capas['b']
 	geomDF=capas['c']
 	imp("Creando Mapa...")
-	m1=_cap["Visible"][0].explore(tooltip=['nombre'],marker_type="circle",style_kwds=dict(color=_cap['Visible'][1],weight=5,opacity=1),marker_kwds=dict(radius=4, fill=True,draggable=True),legend=False,name="Visibles",popup=['nombre','num_hab','gpo'])
-	m2=_cap["Ocultas"][0].explore(m=m1,tooltip=['nombre'],marker_type="circle",style_kwds=dict(color=_cap['Ocultas'][1],weight=3,opacity=0.6),marker_kwds=dict(radius=2, fill=True),legend=False,name="Ocultas",popup=['nombre','num_hab','gpo'])
+	m1=_cap["Visible"][0].explore(tooltip=False,marker_type="circle",style_kwds=dict(color=_cap['Visible'][1],weight=5,opacity=1),marker_kwds=dict(radius=4, fill=True,draggable=True),legend=False,name="Visibles",popup=True)
+	m2=_cap["Ocultas"][0].explore(m=m1,tooltip=True,marker_type="circle",style_kwds=dict(color=_cap['Ocultas'][1],weight=3,opacity=0.6),marker_kwds=dict(radius=2, fill=True),legend=False,name="Ocultas",popup=True)
 	geomDF.explore(m=m2,color="#AAF", tooltip=False,name="Poligono prueba",legend=False)
 	fol.TileLayer("OpenStreetMap",show=True).add_to(m2)
 	fol.LayerControl().add_to(m2)
