@@ -78,7 +78,7 @@ def reducePuntos(**params):
 				buf = gpoX.loc[_g,'geometry'].buffer(distancia)
 				res = gpoX[gpoX.loc[:,'geometry'].intersects(buf)]
 				if res.loc[_g,"isvisible"]:
-					if data:=[dict(idx=i,pob=n,jer=j) for i,n,v,j in zip(res.index,res['num_hab'],res['isvisible'],res[nom_camp[0]]) if v and i!=_g]:
+					if data:=[dict(idx=i,jer=j) for i,n,v,j in zip(res.index,res['isvisible'],res[nom_camp[0]]) if v and i!=_g]:
 						looser = [a['idx'] for a in data if a['jer']>0]
 						agrupados.loc[looser,'isvisible'] = False
 						gpoX.loc[looser,'isvisible'] = False
