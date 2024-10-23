@@ -52,7 +52,7 @@ def procesar(_geom,numPol,_x100):
 		return (numPol,_lin)
 
 
-def separaLineas(_gdb,_fCls,distancia,cpu=cpu_count(),vtx=0,eps=0.001,apx=0.02):
+def inicio(_gdb,_fCls,distancia,cpu=cpu_count(),vtx=0,eps=0.001,apx=0.02):
 	ini = t()
 	Rutas = {'gdb':''}
 	Datos = {'auxLineas':{},'contador':0,'totPol':0,'distancia':0,'geomEnt':{},'vtx':0,'vtxTot':0,'import':importarDatos,'porcAvance':0.00}
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 	parser.add_argument('APX',type=float, nargs='?', default=0.02, help="Valor de aproximacion entre dos coordenadas. Defualt: 0.02")
 	args = list(parser.parse_args().__dict__.values())
 
-	tiempo=separaLineas(*args)
+	tiempo=inicio(*args)
 	print("Tiempo de ejecución: %.3f segundos" % tiempo)
 	
 
