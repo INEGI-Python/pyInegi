@@ -1,5 +1,5 @@
 def generalizar(func=""):
-	from . import reducePuntos
-	from . import separaLineas
-	obj = {"reducePuntos":reducePuntos.inicio,"separaLineas":separaLineas.inicio}
+	from .reducePuntos import inicio_rp
+	from .separaLineas import inicio_sl
+	obj = {"reducePuntos":inicio_rp,"separaLineas":inicio_sl}
 	return obj[func]
