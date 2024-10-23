@@ -1,1 +1,1 @@
-from .generalizar import *
+
