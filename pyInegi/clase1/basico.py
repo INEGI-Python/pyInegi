@@ -6,14 +6,13 @@ import geopandas as gpd
 import os
 
 def punto(x,y):
-  return Point(x,y)
+	return Point(x,y)
 
 def plot(gdf):
-  m = gdf.explore(column="id", cmap="Set1", name="id", legend=True, popup=True)
-  folium.TileLayer('OpenStreetMap').add_to(m)
-  folium.LayerControl().add_to(m)
-  m.show_in_browser()
-  
+	m = gdf.explore(column="id", cmap="Set1", name="id", legend=True, popup=True)
+	folium.TileLayer('OpenStreetMap').add_to(m)
+	folium.LayerControl().add_to(m)
+	m.show_in_browser()
 
 
 def dist2pnts(x1, y1, x2, y2):
