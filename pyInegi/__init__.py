@@ -1,6 +1,4 @@
-from .generalizar import Generalizar
-
-print(dir(Generalizar))
-
+from .generalizar import *
 __version__="1.0.0"
-__ALL__ = ["Generalizar"]
+
+__ALL__ = ["generalizar"]
