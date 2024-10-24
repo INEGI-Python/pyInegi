@@ -10,5 +10,10 @@ usar las lineas que le sean posibles"""
 	def _separaL():
 		from .separaLineas import inicio_sl
 		return inicio_sl
-	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","ayuda":"ayuda","desc":"desc"}
+	def _lineaC():                                                                                                                                                      
+		from .lineaCentral import inicio
+		return inicio
+
+	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC",
+    "ayuda":"ayuda","desc":"desc"}
 	return eval(obj[func])()
