@@ -56,6 +56,7 @@ class Centro(object):
 
 
 def inicio_lc(**_d):
+	print(_d)
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
 	for d in _data.geometry:
