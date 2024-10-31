@@ -23,8 +23,8 @@ class Centro(object):
 				a union of lines that are located within the polygon.
 			"""
 
-			minx = int(min(self.inputGEOM.envelope.exterior.xy[0]))
-			miny = int(min(self.inputGEOM.envelope.exterior.xy[1]))
+			minx = int(min(self.inputGEOM([0])))
+			miny = int(min(self.inputGEOM([1])))
 
 			border = np.array(self.densifyBorder(self.inputGEOM, minx, miny))
 
@@ -115,8 +115,7 @@ def inicio(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
 	for d in _data.geometry:
-		_geom = np.asarray([Point(*p) for p in d.__geo_interface__['coordinates'][0]])
-		print(_geom)
+		_geom = np.asarray([Point(*p).xy for p in d.__geo_interface__['coordinates'][0]])
 		cen = Centro(_geom,0.4)
 		lineaCentralNew = pan.GeoDataFrame(cen.createCenterline())
 		print(lineaCentralNew)
