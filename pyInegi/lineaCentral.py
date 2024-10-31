@@ -22,9 +22,8 @@ class Centro(object):
 			Returns:
 				a union of lines that are located within the polygon.
 			"""
-
-			minx = int(min(self.inputGEOM([0])))
-			miny = int(min(self.inputGEOM([1])))
+			minx = int(min(self.inputGEOM.envelope.exterior.xy[0]))
+			miny = int(min(self.inputGEOM.envelope.exterior.xy[1]))
 
 			border = np.array(self.densifyBorder(self.inputGEOM, minx, miny))
 
@@ -115,8 +114,7 @@ def inicio(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
 	for d in _data.geometry:
-		_geom = [Point(*p).envelope.xy for p in d.__geo_interface__['coordinates'][0]]
-		cen = Centro(_geom,0.4)
+		cen = Centro(d,0.4)
 		lineaCentralNew = pan.GeoDataFrame(cen.createCenterline())
 		print(lineaCentralNew)
 		if _d["ver"]==1:
@@ -140,10 +138,10 @@ if __name__=='__main__':
   
   
   
-#   import numpy as np
-# from shapely import Point
-# _data = pan.read_file("datos/poligonosFrontera.shp")
-# for d in _data.geometry:
-# 	_geom = np.asarray([Point(*p).xy for p in d.__geo_interface__['coordinates'][0]])
-# 	print(min(_geom[0]))
-# 	print(max(_geom[1]))
+  import numpy as np
+from shapely import Point
+_data = pan.read_file("datos/poligonosFrontera.shp")
+for d in _data.geometry:
+	_geom = np.asarray_chkfinite([Point(*d) for d in _data.to_geo_dict()['features'][0]['geometry']["coordinates"][0]])
+	print(min(_geom[0]))
+	print(max(_geom[1]))
