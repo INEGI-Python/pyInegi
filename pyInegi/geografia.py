@@ -14,6 +14,11 @@ usar las lineas que le sean posibles"""
 		from .lineaCentral import inicio
 		return inicio
 
+	def _eliminaVtxEsp():
+		from .eliminaVtxEsp import inicio
+		return inicio
+
+
 	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC",
     "ayuda":"ayuda","desc":"desc"}
 	return eval(obj[func])()
