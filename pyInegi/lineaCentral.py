@@ -112,8 +112,8 @@ class Centro(object):
 
 def inicio(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
-	print(dir(_data))
-	cen = Centro(np.asarray(_data.__geo_interface__['coordinates'])  ,0.4)
+	print(_data.polygonize)
+	cen = Centro(_data.to_numpy()  ,0.4)
 	lineaCentralNew = pan.GeoDataFrame(cen.createCenterline())
 	print(lineaCentralNew)
 	if _d["ver"]==1:
