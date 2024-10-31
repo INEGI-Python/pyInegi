@@ -115,7 +115,7 @@ def inicio(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
 	for d in _data.geometry:
-		_geom = np.asarray([Point(*p).xy for p in d.__geo_interface__['coordinates'][0]])
+		_geom = [Point(*p).envelope.xy for p in d.__geo_interface__['coordinates'][0]]
 		cen = Centro(_geom,0.4)
 		lineaCentralNew = pan.GeoDataFrame(cen.createCenterline())
 		print(lineaCentralNew)
@@ -137,3 +137,13 @@ if __name__=='__main__':
 		print(eval(args.FEAT))
 	else:
 		inicio(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP,ver=args.VER)
+  
+  
+  
+#   import numpy as np
+# from shapely import Point
+# _data = pan.read_file("datos/poligonosFrontera.shp")
+# for d in _data.geometry:
+# 	_geom = np.asarray([Point(*p).xy for p in d.__geo_interface__['coordinates'][0]])
+# 	print(min(_geom[0]))
+# 	print(max(_geom[1]))
