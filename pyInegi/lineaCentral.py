@@ -1,7 +1,7 @@
 import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
-from shapely import Point
+from shapely import Point,LineString
 import argparse 
 
 
