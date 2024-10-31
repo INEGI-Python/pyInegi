@@ -11,12 +11,12 @@ usar las lineas que le sean posibles"""
 		from .separaLineas import inicio_sl
 		return inicio_sl
 	def _lineaC():                                                                                                                                                      
-		from .lineaCentral import inicio
-		return inicio
+		from .lineaCentral import inicio_lc
+		return inicio_lc
 
 	def _eliminaVtxEsp():
-		from .eliminaVtxEsp import inicio
-		return inicio
+		from .eliminaVtxEsp import inicio_ev
+		return inicio_ev
 
 
 	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC",
