@@ -114,15 +114,16 @@ class Centro(object):
 def inicio(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
-	_geom = np.asarray([Point(*p) for p in _data.__geo_interface__['features'][0]['geometry']['coordinates'][0]])
-	print(_geom)
-	cen = Centro(_geom,0.4)
-	lineaCentralNew = pan.GeoDataFrame(cen.createCenterline())
-	print(lineaCentralNew)
-	if _d["ver"]==1:
-		plot(lineaCentralNew)
-		plot.show()
-		#_data.plot()
+	for d in _data.geometry:
+		_geom = np.asarray([Point(*p) for p in d.__geo_interface__['coordinates'][0]])
+		print(_geom)
+		cen = Centro(_geom,0.4)
+		lineaCentralNew = pan.GeoDataFrame(cen.createCenterline())
+		print(lineaCentralNew)
+		if _d["ver"]==1:
+			plot(lineaCentralNew)
+			plot.show()
+			#_data.plot()
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")
