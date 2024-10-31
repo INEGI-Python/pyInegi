@@ -1,11 +1,14 @@
 import geopandas as pan
+import  matplotlib.pyplot as plot
 import argparse 
 
 def inicio(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	print(_data)
 	if _d["ver"]==1:
-		_data.plot()
+		plot(_data)
+		plot.show()
+		#_data.plot()
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")
