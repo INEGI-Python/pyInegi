@@ -9,13 +9,18 @@ dependencies = [
     "pandas",
     "numpy",
     "matplotlib",
-    "geopandas" 
+    "geopandas",
+    "folium",
+    "mapclassify",
+    "shapely",
+    "httpimport"
 ]
-
 
 [project]
 name="pyInegi"
 version="1.0.0"
+autor="INEGI"
+fecha="2024"
 
 
 
