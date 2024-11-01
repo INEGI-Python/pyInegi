@@ -60,7 +60,7 @@ def inicio_lc(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
 	for d in _data.geometry:
-		cen = Centro(d,_d["dist"])
+		cen = Centro(d,int(_d["dist"]))
 		_result=cen.createCenterline()
 		lineaCentralNew = pan.GeoDataFrame(data=[{"id":id} for id in range(1,_result.length+1)],geometry=_result,crs="EPSG:6372")
 		print(lineaCentralNew)
