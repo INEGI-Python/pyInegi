@@ -8,7 +8,7 @@ import argparse
 
 
 class Centro(object):
-		def __init__(self, inputGEOM, dist=0.5):
+		def __init__(self, inputGEOM, dist):
 			self.inputGEOM = inputGEOM
 			self.dist = abs(dist)
 
@@ -60,7 +60,7 @@ def inicio_lc(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	_data.plot()
 	for d in _data.geometry:
-		cen = Centro(d,int(_d["dist"]))
+		cen = Centro(d,_d["dist"])
 		_result=cen.createCenterline()
 		lineaCentralNew = pan.GeoDataFrame(data=[{"id":id} for id in range(1,_result.length+1)],geometry=_result,crs="EPSG:6372")
 		print(lineaCentralNew)
@@ -74,7 +74,7 @@ if __name__=='__main__':
 	parser.add_argument('GDB',type=str, help="Ruta absoluta o relativa  de  una Geodatabase o un Shapefile")
 	parser.add_argument('FEAT',type=str,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
 	parser.add_argument("CAMP",type=str, nargs='?', default=["*"], help="Arreglo de campos a obtener de sus datos")
-	parser.add_argument("DIST",type=float, nargs='?', default=0.5, help="Arreglo de campos a obtener de sus datos")
+	parser.add_argument("DIST",type=int, nargs='?', default=100, help="Distancia entre vertices para la densificación")
 	parser.add_argument("VER",type=int, nargs='?', default=1, help="Genera y muestra un Mapa Web con el resultado. Default: 1")
 
 	args = parser.parse_args()
