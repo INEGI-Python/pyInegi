@@ -10,7 +10,7 @@ import argparse
 class Centro(object):
 		def __init__(self, inputGEOM, dist):
 			self.inputGEOM = inputGEOM
-			self.dist = abs(dist)
+			self.dist = dist
 
 		def createCenterline(self):
 			minx = int(min(self.inputGEOM.envelope.exterior.xy[0]))
