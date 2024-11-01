@@ -13,8 +13,8 @@ class Centro(object):
 			self.dist = abs(dist)
 
 		def createCenterline(self):
-			minx = min(self.inputGEOM.envelope.exterior.xy[0])
-			miny = min(self.inputGEOM.envelope.exterior.xy[1])
+			minx = int(min(self.inputGEOM.envelope.exterior.xy[0]))
+			miny = int(min(self.inputGEOM.envelope.exterior.xy[1]))
 			border = np.array(self.densifyBorder(self.inputGEOM, minx, miny))
 
 			vor = Voronoi(border)
@@ -52,22 +52,21 @@ class Centro(object):
 				newline.append([point.x - minx, point.y - miny])
 				count += self.dist
 			newline.append(endpoint)
-			return np.asarray(newline)
+			return newline
 
 
 def inicio_lc(**_d):
 	print(_d)
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
+	CRS = _data.crs.to_string()
 	_data.plot()
 	for d in _data.geometry:
 		cen = Centro(d,_d["dist"])
 		_result=cen.createCenterline()
-		lineaCentralNew = pan.GeoDataFrame(data=[{"id":id} for id in range(1,_result.length+1)],geometry=_result,crs="EPSG:6372")
-		print(lineaCentralNew)
+		lineaCentralNew = pan.GeoDataFrame(data=[{"id":1}],geometry=[_result],crs=CRS)
 		if _d["ver"]==1:
-			plot(lineaCentralNew)
+			lineaCentralNew.plot()
 			plot.show()
-			#_data.plot()
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")
