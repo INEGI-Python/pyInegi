@@ -10,11 +10,11 @@ import argparse
 class Centro(object):
 		def __init__(self, inputGEOM, dist):
 			self.inputGEOM = inputGEOM
-			self.dist = dist
+			self.dist = abs(dist)
 
 		def createCenterline(self):
-			minx = int(min(self.inputGEOM.envelope.exterior.xy[0]))
-			miny = int(min(self.inputGEOM.envelope.exterior.xy[1]))
+			minx = min(self.inputGEOM.envelope.exterior.xy[0])
+			miny = min(self.inputGEOM.envelope.exterior.xy[1])
 			border = np.array(self.densifyBorder(self.inputGEOM, minx, miny))
 
 			vor = Voronoi(border)
