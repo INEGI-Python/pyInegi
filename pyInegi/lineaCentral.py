@@ -63,10 +63,11 @@ def inicio_lc(**_d):
 	for d in _data.geometry:
 		cen = Centro(d,_d["dist"])
 		_result=cen.createCenterline()
-		lineaCentralNew = pan.GeoDataFrame(data=[{"id":1}],geometry=[_result],crs=CRS)
+		lineaCentralNew = pan.GeoDataFrame(data=[{"id":d}],geometry=[_result],crs=CRS)
 		if _d["ver"]==1:
 			lineaCentralNew.plot()
 			plot.show()
+   
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")

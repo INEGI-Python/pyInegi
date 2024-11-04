@@ -18,7 +18,11 @@ usar las lineas que le sean posibles"""
 		from .eliminaVtxEsp import inicio_ev
 		return inicio_ev
 
+	def _puertos():
+		from .instalacionesPortuarias import inicio_ip
+		return inicio_ip
 
-	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC",
+
+	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC","puertos":"_puertos",
     "ayuda":"ayuda","desc":"desc"}
 	return eval(obj[func])()
