@@ -68,18 +68,13 @@ def inicio_lc(**_d):
 		cen = Centro(d,_d["dist"])
 		_result=cen.createCenterline()
 		_todo.append(_result)
-		print(len(_todo),_todo)
-		#lineaCentralNew = pan.GeoDataFrame(data=[{"id":d}],geometry=[_result],crs=CRS)		
 	_todoGDF = pan.GeoDataFrame(data=[{"id":x} for x in range(1,len(_todo)+1)],geometry=_todo,crs=CRS)
 	if _d["ver"]==1:
 		_todoGDF.plot()
 		plot.show()
-	_todoGDF.to_file("esqueletor.shp")
-	from arcpy.management import SelectLayerByLocation as sL, DeleteFeatures as dF, Delete as d
-	sL("esqueletor.shp","INTERSECT","poligono.shp")
-	dF("esqueletor.shp")
-	d("poligono.shp")
- 
+	_central = _todoGDF[_todoGDF.loc[:,'geometry'].intersects(pol2Linea(_data.geometry))]
+	_central.to_file("central.shp")
+
 	#os.system("C:\Python27\ArcGIS10.8\python.exe")
 
 if __name__=='__main__':
