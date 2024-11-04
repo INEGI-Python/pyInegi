@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
@@ -5,7 +6,8 @@ from shapely.geometry import LineString
 from shapely.ops import unary_union
 from scipy.spatial import Voronoi
 import argparse 
-
+from .basico import pol2Linea
+from .shapely_tools import intersection_points
 
 class Centro(object):
 		def __init__(self, inputGEOM, dist):
@@ -58,16 +60,27 @@ class Centro(object):
 def inicio_lc(**_d):
 	print(_d)
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
+	_data.to_file("poligono.shp")
 	CRS = _data.crs.to_string()
 	_data.plot()
+	_todo=[]
 	for d in _data.geometry:
 		cen = Centro(d,_d["dist"])
 		_result=cen.createCenterline()
-		lineaCentralNew = pan.GeoDataFrame(data=[{"id":d}],geometry=[_result],crs=CRS)
-		if _d["ver"]==1:
-			lineaCentralNew.plot()
-			plot.show()
-   
+		_todo.append(_result)
+		print(len(_todo),_todo)
+		#lineaCentralNew = pan.GeoDataFrame(data=[{"id":d}],geometry=[_result],crs=CRS)		
+	_todoGDF = pan.GeoDataFrame(data=[{"id":x} for x in range(1,len(_todo)+1)],geometry=_todo,crs=CRS)
+	if _d["ver"]==1:
+		_todoGDF.plot()
+		plot.show()
+	_todoGDF.to_file("esqueletor.shp")
+	from arcpy.management import SelectLayerByLocation as sL, DeleteFeatures as dF, Delete as d
+	sL("esqueletor.shp","INTERSECT","poligono.shp")
+	dF("esqueletor.shp")
+	d("poligono.shp")
+ 
+	#os.system("C:\Python27\ArcGIS10.8\python.exe")
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")
@@ -75,7 +88,7 @@ if __name__=='__main__':
 	parser.add_argument('FEAT',type=str,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
 	parser.add_argument("CAMP",type=str, nargs='?', default=["*"], help="Arreglo de campos a obtener de sus datos")
 	parser.add_argument("DIST",type=int, nargs='?', default=100, help="Distancia entre vertices para la densificación")
-	parser.add_argument("VER",type=int, nargs='?', default=1, help="Genera y muestra un Mapa Web con el resultado. Default: 1")
+	parser.add_argument("VER",type=int, nargs='?', default=1, help="Genera y muestra un Mapa con el resultado. Default: 1")
 
 	args = parser.parse_args()
 	if args.FEAT=="fiona.listlayers(args.GDB)":

@@ -1,4 +1,4 @@
-from shapely import Point
+from shapely import *
 import folium
 import numpy as np
 import shapely as shpy

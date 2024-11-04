@@ -488,5 +488,6 @@ def remove_redundant_nodes(lines,_coords=False, tolerance=1e-7):
 			lines_out.append(LineString([c for i, c in enumerate(coords) if i not in idx]))
 		return lines_out
     
-	def remove_nodes_especificos(featureIN,featQuitar):
-     
+def remove_nodes_especificos(featureIN,featQuitar):
+	arrayPuntos=[]
+	return arrayPuntos
