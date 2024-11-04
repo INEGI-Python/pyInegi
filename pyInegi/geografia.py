@@ -23,6 +23,5 @@ usar las lineas que le sean posibles"""
 		return inicio_ip
 
 
-	obj = {"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC","puertos":"_puertos",
-    "ayuda":"ayuda","desc":"desc"}
-	return eval(obj[func])()
+	return eval({"reducePuntos":"_reduceP","separaLineas":"_separaL","lineaCentral":"_lineaC",
+    "ayuda":"ayuda","desc":"desc"}[func])()
