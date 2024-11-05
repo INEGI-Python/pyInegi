@@ -2,12 +2,13 @@ import os
 import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
-from shapely.geometry import LineString
-from shapely.ops import unary_union
+from shapely.geometry import LineString,Polygon,Point,GeometryCollection
+
 from scipy.spatial import Voronoi
 import argparse 
-from .basico import pol2Linea
-from .shapely_tools import intersection_points
+from polyskel import skeletonize
+from funciones import unir
+from multiprocessing import Pool
 
 class Centro(object):
 		def __init__(self, inputGEOM, dist):
@@ -56,25 +57,41 @@ class Centro(object):
 			newline.append(endpoint)
 			return newline
 
+def crearArchivo(_dat,name):
+	noms = name.split(".")
+	if os.path.exists(name):
+		newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
+		_dat.to_file(f"{newName}.{noms[1]}")
+  
+def procesar(_geom): 
+	print(_geom)
+	print(os.pid(),_geom)
+	_lin,skeleton=[],{"lin":[],"cen":[]}
+	skeleton = skeletonize(_geom,1)
+	print(f"PROCESO  ---> {os.pid()}")
+	_lin=[x for x in [unir(l,skeleton["cen"]) for l in skeleton["lin"]] if x] 
+	if len(_lin)>0:
+		return _lin
+
 
 def inicio_lc(**_d):
-	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
-	_data.to_file("poligono.shp")
+	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])  
+	crearArchivo(_data,"poligonos.shp")
 	CRS = _data.crs.to_string()
 	_data.plot()
-	_todo=[]
-	for d in _data.geometry:
-		cen = Centro(d,_d["dist"])
-		_result=cen.createCenterline()
-		_todo.append(_result)
-	_todoGDF = pan.GeoDataFrame(data=[{"id":x} for x in range(1,len(_todo)+1)],geometry=_todo,crs=CRS)
-	if _d["ver"]==1:
-		_todoGDF.plot()
-		plot.show()
-	_central = _todoGDF[_todoGDF.loc[:,'geometry'].intersects(pan.GeoDataFrame(pol2Linea(_data.geometry)))]
-	_central.to_file("central.shp")
+	# _todo=[]
+	# for d in _data.geometry:
+	# 	cen = Centro(d,_d["dist"])
+	# 	_result=cen.createCenterline()
+	# 	_todo.append(_result)
+	features = _data.geometry.__geo_interface__['features']
+	feat_list = [list(f['geometry']['coordinates'][0]) for f in features]
+	with Pool(4) as pool:
+		res = pool.map(procesar,feat_list)
+		pool.close()
+		print(res)
+	
 
-	#os.system("C:\Python27\ArcGIS10.8\python.exe")
 
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")

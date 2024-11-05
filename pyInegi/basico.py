@@ -52,3 +52,5 @@ def imp(text):
 
 def colores(v):
   return "red" if v==True else "gray"
+
+data = {'dist':120.0,'EPSILON':0.001000,'APROX':0.020000}

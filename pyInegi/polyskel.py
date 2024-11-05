@@ -408,47 +408,33 @@ class _EventQueue:
 
 	
 def skeletonize(polygon,id=0,holes=[]):
-	from parametros import data as d
+	from .basico import  data as d
 	slav = _SLAV(polygon, holes)
 	output = {"lin":[],"cen":[]}
 	prioque = _EventQueue()
 	for lav in slav:
 		for vertex in lav:
 			prioque.put(vertex.next_event())
-	contNones,conta = 0,30
+
 	while not (prioque.empty() or slav.empty()):
 		i = prioque.get()
 		if isinstance(i, _EdgeEvent):
-			conta = memoria(100,1000,id,conta,"IF _EdgeEvent")
 			if not i.vertex_a.is_valid or not i.vertex_b.is_valid:
 				continue
-			(arc, events) = slav.handle_edge_event(i)
-
+			(arc, events) = slav.handle_edge_event()
 		elif isinstance(i, _SplitEvent):
-			conta = memoria(100,1000,id,conta,"IF _SplitEvent")
-			if not i.vertex.is_valid:
-				continue
-			
-			(arc, events) = slav.handle_split_event(i,id)
+			continue
+		(arc, events) = slav.handle_split_event(i,id)
 
 		prioque.put_all(events)
 		if arc is not None:
 			contNones = 0
-			#if d['act']:
-			if d['dist']*0.5 < arc.height < d['dist']:
-				for sink in arc.sinks:
-					if (arc.source.x, arc.source.y) in polygon or (sink.x, sink.y) in polygon:
-						output["lin"].append([(arc.source.x, arc.source.y),(sink.x, sink.y)])
-					else:
-						output["cen"].append((arc.source.x, arc.source.y))
-						output["cen"].append((sink.x, sink.y))
-			elif arc.height > d['dist']:
-				contNones+=1
-				if contNones>3:
-					break
-			#else:
-				#for sink in arc.sinks:
-					#output["lin"].append([(arc.source.x, arc.source.y),(sink.x, sink.y)])
+			for sink in arc.sinks:
+				if (arc.source.x, arc.source.y) in polygon or (sink.x, sink.y) in polygon:
+					output["lin"].append([(arc.source.x, arc.source.y),(sink.x, sink.y)])
+				else:
+					output["cen"].append((arc.source.x, arc.source.y))
+					output["cen"].append((sink.x, sink.y))
 		else:
 			contNones += 1
 			if contNones > 3:
