@@ -30,7 +30,7 @@ class Centro(object):
 						(vertex[ridge[1]][0] + minx, vertex[ridge[1]][1] + miny)])
 					if line.within(self.inputGEOM) and len(line.coords[0]) > 1:
 						lst_lines.append(line)
-			return unary_union(lst_lines)
+			return lst_lines
 
 		def densifyBorder(self, polygon, minx, miny):
 			if len(polygon.interiors) == 0:
@@ -72,7 +72,7 @@ def inicio_lc(**_d):
 	if _d["ver"]==1:
 		_todoGDF.plot()
 		plot.show()
-	_central = _todoGDF[_todoGDF.loc[:,'geometry'].intersects(pol2Linea(_data.geometry))]
+	_central = _todoGDF[_todoGDF.loc[:,'geometry'].intersects(pan.GeoDataFrame(pol2Linea(_data.geometry)))]
 	_central.to_file("central.shp")
 
 	#os.system("C:\Python27\ArcGIS10.8\python.exe")
