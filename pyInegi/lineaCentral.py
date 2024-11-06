@@ -3,12 +3,8 @@ import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
 from shapely.geometry import LineString,Polygon,Point,GeometryCollection
-
 from scipy.spatial import Voronoi
 import argparse 
-from polyskel import skeletonize
-from funciones import unir
-from multiprocessing import Pool
 
 class Centro(object):
 		def __init__(self, inputGEOM, dist):
@@ -62,34 +58,26 @@ def crearArchivo(_dat,name):
 	if os.path.exists(name):
 		newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
 		_dat.to_file(f"{newName}.{noms[1]}")
-  
-def procesar(_geom): 
-	print(_geom)
-	print(os.pid(),_geom)
-	_lin,skeleton=[],{"lin":[],"cen":[]}
-	skeleton = skeletonize(_geom,1)
-	print(f"PROCESO  ---> {os.pid()}")
-	_lin=[x for x in [unir(l,skeleton["cen"]) for l in skeleton["lin"]] if x] 
-	if len(_lin)>0:
-		return _lin
-
 
 def inicio_lc(**_d):
-	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])  
-	crearArchivo(_data,"poligonos.shp")
+	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	CRS = _data.crs.to_string()
 	_data.plot()
-	# _todo=[]
-	# for d in _data.geometry:
-	# 	cen = Centro(d,_d["dist"])
-	# 	_result=cen.createCenterline()
-	# 	_todo.append(_result)
-	features = _data.geometry.__geo_interface__['features']
-	feat_list = [list(f['geometry']['coordinates'][0]) for f in features]
-	with Pool(4) as pool:
-		res = pool.map(procesar,feat_list)
-		pool.close()
-		print(res)
+	_todo=[]
+	for d in _data.geometry:
+		cen = Centro(d,_d["dist"])
+		_result=cen.createCenterline()
+		_todo.append(pan.GeoDataFrame(geometry=_result))
+	from shapely.ops import unary_union
+	print(dir(_todo))
+	for t in _todo:
+		t.subplot()
+#  features = _data.geometry.__geo_interface__['features']
+# 	feat_list = [list(f['geometry']['coordinates'][0]) for f in features]
+# 	with Pool(4) as pool:
+# 		res = pool.map(procesar,feat_list)
+# 		pool.close()
+# 		print(res)
 	
 
 
@@ -98,7 +86,7 @@ if __name__=='__main__':
 	parser.add_argument('GDB',type=str, help="Ruta absoluta o relativa  de  una Geodatabase o un Shapefile")
 	parser.add_argument('FEAT',type=str,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
 	parser.add_argument("CAMP",type=str, nargs='?', default=["*"], help="Arreglo de campos a obtener de sus datos")
-	parser.add_argument("DIST",type=int, nargs='?', default=100, help="Distancia entre vertices para la densificación")
+	parser.add_argument("DIST",type=int, nargs='?', default=10, help="Distancia entre vertices para la densificación")
 	parser.add_argument("VER",type=int, nargs='?', default=1, help="Genera y muestra un Mapa con el resultado. Default: 1")
 
 	args = parser.parse_args()
