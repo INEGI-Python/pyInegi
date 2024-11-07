@@ -59,6 +59,8 @@ def crearArchivo(_dat,name):
 	if os.path.exists(name):
 		newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
 		_dat.to_file(f"{newName}.{noms[1]}")
+	else:
+		_dat.to_file(name)
 
 def inicio_lc(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
