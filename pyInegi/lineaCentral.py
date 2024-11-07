@@ -3,7 +3,7 @@ import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
 import folium
-from shapely.geometry import LineString,Polygon,Point,GeometryCollection
+from shapely.geometry import LineString,MultiLineString
 from scipy.spatial import Voronoi
 import argparse 
 
@@ -53,6 +53,19 @@ class Centro(object):
 				count += self.dist
 			newline.append(endpoint)
 			return newline
+		
+		def obtener_linea_central_voronoi(self,poligono):
+			puntos = np.array(poligono.exterior.coords)
+			vor = Voronoi(puntos)
+			lineas_voronoi = []
+			for punto1, punto2 in vor.ridge_vertices:
+				if punto1 >= 0 and punto2 >= 0:  # Ignorar puntos en el infinito
+					linea = [vor.vertices[punto1], vor.vertices[punto2]]
+					lineas_voronoi.append(linea)
+					lineas = MultiLineString(lineas_voronoi)
+					linea_central = lineas.intersection(poligono)
+			return linea_central
+
 
 def crearArchivo(_dat,name):
 	noms = name.split(".")
