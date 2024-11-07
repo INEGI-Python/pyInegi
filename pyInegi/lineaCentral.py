@@ -2,6 +2,7 @@ import os
 import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
+import folium
 from shapely.geometry import LineString,Polygon,Point,GeometryCollection
 from scipy.spatial import Voronoi
 import argparse 
@@ -63,22 +64,24 @@ def inicio_lc(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	CRS = _data.crs.to_string()
 	_data.plot()
-	_todo=[]
+	pol,_result,id=1,[],1
 	for d in _data.geometry:
 		cen = Centro(d,_d["dist"])
-		_result=cen.createCenterline()
-		_todo.append(pan.GeoDataFrame(geometry=_result))
-	from shapely.ops import unary_union
-	print(dir(_todo))
-	for t in _todo:
-		t.subplot()
-#  features = _data.geometry.__geo_interface__['features']
-# 	feat_list = [list(f['geometry']['coordinates'][0]) for f in features]
-# 	with Pool(4) as pool:
-# 		res = pool.map(procesar,feat_list)
-# 		pool.close()
-# 		print(res)
-	
+		tmp=cen.createCenterline()
+		for geo in tmp:
+			_result.append({"id":id,"pol":pol,"geometry":geo,"crs":CRS})
+			id+=1
+		pol+=1
+	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
+	if not os.path.exists("DatosSalida"): 
+		os.mkdir("DatosSalida")
+	crearArchivo(_todo,"DatosSalida/centerLineSalida.shp")
+	if _d["ver"]==1:
+		m = _todo.explore(tooltip=True,name="Linea Central")
+		_data.explore(m=m,name="Poligonos",color="red")
+		folium.TileLayer("OpenStreetMap",show=True).add_to(m)
+		folium.LayerControl().add_to(m)
+		m.show_in_browser()
 
 
 if __name__=='__main__':
