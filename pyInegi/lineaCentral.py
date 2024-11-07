@@ -112,10 +112,10 @@ def inicio_lc(**_d):
 		m1 = _todo.explore(tooltip=True,name="Linea Central")		
 		m2 = voro1.explore(m=m1,tooltip=True,name="Linea Central Quick")
 		
-		_data.explore(m=m2,name="Poligonos",color="red")
-		folium.TileLayer("OpenStreetMap",show=True).add_to(m2)
-		folium.LayerControl().add_to(m2)
-		m2.show_in_browser()
+		m3 = _data.explore(m=m2,name="Poligonos",color="red")
+		folium.TileLayer("OpenStreetMap",show=True).add_to(m3)
+		folium.LayerControl().add_to(m3)
+		m3.show_in_browser()
 
 
 if __name__=='__main__':
