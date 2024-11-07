@@ -3,7 +3,7 @@ import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
 import folium
-from shapely.geometry import LineString,MultiLineString
+from shapely.geometry import LineString,MultiLineString,shape
 from scipy.spatial import Voronoi
 import argparse 
 
@@ -72,7 +72,7 @@ class Centro(object):
 			lineas2 = MultiLineString(lineas2_voro)
 			linea_central = lineas.intersection(poligono)
 			linea_central2 = lineas2.intersection(poligono)
-			return linea_central,linea_central2.simplify(100)
+			return linea_central,linea_central2.simplify(0.1)
 
 
 def renombrar(name):
@@ -88,6 +88,8 @@ def inicio_lc(**_d):
 	CRS = _data.crs.to_string()
 	_data.plot()
 	pol,_result,id=1,[],1
+	if not os.path.exists("DatosSalida"): 
+		os.mkdir("DatosSalida")
 	voroCen = open(renombrar("DatosSalida/voroCen.geojson"),"w")
 	features=[]
 	for d in _data.geometry:
@@ -99,18 +101,19 @@ def inicio_lc(**_d):
 			_result.append({"id":id,"pol":pol,"geometry":geo,"crs":CRS})
 			id+=1
 		pol+=1
+	geoms = [shape(f) for f in features]
+	voro1 = pan.GeoDataFrame({'geometry':geoms})
 	voroCen.write(json.dumps({"type":"FeatureCollection","crs":{"type":"EPSG","properties":{"code":6372,"coordinate_order":[1,0]}} ,"features":features}))
 	voroCen.close()
 	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
-	if not os.path.exists("DatosSalida"): 
-		os.mkdir("DatosSalida")
 	_todo.to_file(renombrar("DatosSalida/centerLineSalida.shp"))
 	if _d["ver"]==1:
-		m = _todo.explore(tooltip=True,name="Linea Central")
-		_data.explore(m=m,name="Poligonos",color="red")
-		folium.TileLayer("OpenStreetMap",show=True).add_to(m)
-		folium.LayerControl().add_to(m)
-		m.show_in_browser()
+		m1=voro1.explore(tooltip=True,name="Linea Central Quick")
+		m2 = _todo.explore(m=m1,tooltip=True,name="Linea Central")
+		_data.explore(m=m2,name="Poligonos",color="red")
+		folium.TileLayer("OpenStreetMap",show=True).add_to(m2)
+		folium.LayerControl().add_to(m2)
+		m2.show_in_browser()
 
 
 if __name__=='__main__':
