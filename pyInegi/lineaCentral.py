@@ -1,4 +1,4 @@
-import os
+import os,json
 import numpy as np
 import geopandas as pan
 import  matplotlib.pyplot as plot
@@ -54,17 +54,25 @@ class Centro(object):
 			newline.append(endpoint)
 			return newline
 		
-		def obtener_linea_central_voronoi(self,poligono):
+		def obtener_linea_central_voronoi(self):
+			poligono=self.inputGEOM
 			puntos = np.array(poligono.exterior.coords)
+			borde = LineString(puntos)
 			vor = Voronoi(puntos)
-			lineas_voronoi = []
+			lineas_voronoi,lineas2_voro = [],[]
 			for punto1, punto2 in vor.ridge_vertices:
 				if punto1 >= 0 and punto2 >= 0:  # Ignorar puntos en el infinito
 					linea = [vor.vertices[punto1], vor.vertices[punto2]]
+					linea2 = LineString([vor.vertices[punto1], vor.vertices[punto2]])
+					res = linea2.intersection(borde)
+					if res.is_empty:
+						lineas2_voro.append(linea)
 					lineas_voronoi.append(linea)
-					lineas = MultiLineString(lineas_voronoi)
-					linea_central = lineas.intersection(poligono)
-			return linea_central
+			lineas = MultiLineString(lineas_voronoi)
+			lineas2 = MultiLineString(lineas2_voro)
+			linea_central = lineas.intersection(poligono)
+			linea_central2 = lineas2.intersection(poligono)
+			return linea_central,linea_central2.simplify(100)
 
 
 def crearArchivo(_dat,name):
@@ -80,16 +88,19 @@ def inicio_lc(**_d):
 	CRS = _data.crs.to_string()
 	_data.plot()
 	pol,_result,id=1,[],1
+	voroCen = open("DatosSalida/voroCen.geojson","w")
+	features=[]
 	for d in _data.geometry:
-		buff = d.buffer(0)
-		linCen = buff.centroid
-		print(linCen)
 		cen = Centro(d,_d["dist"])
+		Multi,Multi2=cen.obtener_linea_central_voronoi()
+		features.append({"type":"Feature","properties":{"id":pol},"geometry":Multi2.__geo_interface__})
 		tmp=cen.createCenterline()
 		for geo in tmp:
 			_result.append({"id":id,"pol":pol,"geometry":geo,"crs":CRS})
 			id+=1
 		pol+=1
+	voroCen.write(json.dumps({"type":"FeatureCollection","crs":{"type":"EPSG","properties":{"code":6372,"coordinate_order":[1,0]}} ,"features":features}))
+	voroCen.close()
 	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
 	if not os.path.exists("DatosSalida"): 
 		os.mkdir("DatosSalida")
