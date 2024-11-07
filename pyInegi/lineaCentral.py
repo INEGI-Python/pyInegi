@@ -103,13 +103,15 @@ def inicio_lc(**_d):
 		pol+=1
 	geoms = [shape(f['geometry']) for f in features]
 	voro1 = pan.GeoDataFrame({'geometry':geoms})
+	print(voro1)
 	voroCen.write(json.dumps({"type":"FeatureCollection","crs":{"type":"EPSG","properties":{"code":6372,"coordinate_order":[1,0]}} ,"features":features}))
 	voroCen.close()
 	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
 	_todo.to_file(renombrar("DatosSalida/centerLineSalida.shp"))
 	if _d["ver"]==1:
-		m1=voro1.explore(tooltip=True,name="Linea Central Quick")
-		m2 = _todo.explore(m=m1,tooltip=True,name="Linea Central")
+		m1 = _todo.explore(tooltip=True,name="Linea Central")		
+		m2 = voro1.explore(m=m1,tooltip=True,name="Linea Central Quick")
+		
 		_data.explore(m=m2,name="Poligonos",color="red")
 		folium.TileLayer("OpenStreetMap",show=True).add_to(m2)
 		folium.LayerControl().add_to(m2)
