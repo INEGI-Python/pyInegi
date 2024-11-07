@@ -75,20 +75,20 @@ class Centro(object):
 			return linea_central,linea_central2.simplify(100)
 
 
-def crearArchivo(_dat,name):
+def renombrar(name):
 	noms = name.split(".")
 	if os.path.exists(name):
 		newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
-		_dat.to_file(f"{newName}.{noms[1]}")
+		return f"{newName}.{noms[1]}"
 	else:
-		_dat.to_file(name)
+		return name
 
 def inicio_lc(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	CRS = _data.crs.to_string()
 	_data.plot()
 	pol,_result,id=1,[],1
-	voroCen = open("DatosSalida/voroCen.geojson","w")
+	voroCen = open(renombrar("DatosSalida/voroCen.geojson"),"w")
 	features=[]
 	for d in _data.geometry:
 		cen = Centro(d,_d["dist"])
@@ -104,7 +104,7 @@ def inicio_lc(**_d):
 	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
 	if not os.path.exists("DatosSalida"): 
 		os.mkdir("DatosSalida")
-	crearArchivo(_todo,"DatosSalida/centerLineSalida.shp")
+	_todo.to_file(renombrar("DatosSalida/centerLineSalida.shp"))
 	if _d["ver"]==1:
 		m = _todo.explore(tooltip=True,name="Linea Central")
 		_data.explore(m=m,name="Poligonos",color="red")
