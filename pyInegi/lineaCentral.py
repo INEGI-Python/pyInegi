@@ -101,7 +101,7 @@ def inicio_lc(**_d):
 			_result.append({"id":id,"pol":pol,"geometry":geo,"crs":CRS})
 			id+=1
 		pol+=1
-	geoms = [shape(f) for f in features]
+	geoms = [shape(f['geometry']) for f in features]
 	voro1 = pan.GeoDataFrame({'geometry':geoms})
 	voroCen.write(json.dumps({"type":"FeatureCollection","crs":{"type":"EPSG","properties":{"code":6372,"coordinate_order":[1,0]}} ,"features":features}))
 	voroCen.close()
