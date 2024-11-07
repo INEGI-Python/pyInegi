@@ -68,6 +68,9 @@ def inicio_lc(**_d):
 	_data.plot()
 	pol,_result,id=1,[],1
 	for d in _data.geometry:
+		buff = d.buffer(0)
+		linCen = buff.centroid
+		print(linCen)
 		cen = Centro(d,_d["dist"])
 		tmp=cen.createCenterline()
 		for geo in tmp:
