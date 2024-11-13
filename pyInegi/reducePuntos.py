@@ -49,7 +49,7 @@ def crearMapa(**capas):
 	m2.show_in_browser()
 
 
-def inicio_rp(**params):
+def inicio_rp(params):
 	imp(params)
 	gdb = params['gdb']
 	feat = params['feat']
@@ -106,17 +106,18 @@ def inicio_rp(**params):
 
 if __name__ == "__main__":
 	parser = ag.ArgumentParser(description="Esta aplicación generaliza una capa  de   tipo punto, reduciendo la cantidad de elementos basados en una distancia dada")
-	parser.add_argument('GDB',type=str, help="Ruta absoluta o relativa  de  una Geodatabase o un Shapefile")
-	parser.add_argument('FEAT',type=str,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
-	parser.add_argument("CAMP",type=str, nargs='?', default="Jerarquia:1", help="Campos y su ordenamiento separados por coma que se utilizaran como criterios de importancia. Ejemplo: - jerarquia:1 -  0 = Descendente  1 = Ascendente  ")
-	parser.add_argument("DIST",type=int, nargs='?', default=20000, help="Distancia en metros que deberan de existir entre dos puntos del resultado. Default: 20000")
-	parser.add_argument("VER",type=int, nargs='?', default=1, help="Genera y muestra un Mapa Web con el resultado. Default: 1")	
+	parser.add_argument('gdb',type=str, help="Ruta absoluta o relativa  de  una Geodatabase o un Shapefile")
+	parser.add_argument('feat',type=str,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
+	parser.add_argument("camp",type=str, nargs='?', default="Jerarquia:1", help="Campos y su ordenamiento separados por coma que se utilizaran como criterios de importancia. Ejemplo: - jerarquia:1 -  0 = Descendente  1 = Ascendente  ")
+	parser.add_argument("dist",type=int, nargs='?', default=20000, help="Distancia en metros que deberan de existir entre dos puntos del resultado. Default: 20000")
+	parser.add_argument("ver",type=int, nargs='?', default=1, help="Genera y muestra un Mapa Web con el resultado. Default: 1")	
 	
 	args = parser.parse_args()
-	if args.FEAT=="fiona.listlayers(args.GDB)":
+	if args.FEAT=="fiona.listlayers(args.gdb)":
 		import fiona
 		print(eval(args.FEAT))
 	else:
-		inicio_rp(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP.split(","),dist=args.DIST,ver=args.VER)
+		inicio_rp(args)
+		#inicio_rp(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP.split(","),dist=args.DIST,ver=args.VER)
 #else:
 #   main(gdb='datos/prueba2.shp', feat='_', camp="Jerarquia:1,geografico:1,num_hab:0".split(","),dist=1500,ver=1) 
