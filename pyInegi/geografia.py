@@ -1,7 +1,7 @@
 class Generalizar(object):
 	def __init__(self,**f):
 		self.param=f
-		print(self.param)
+		self.eje = eval(self.param['func'])()
 	def separaLineas(self):
 		from .separaLineas import inicio_sl
 		inicio_sl(self.param.values())
@@ -17,6 +17,9 @@ class Generalizar(object):
 	def lineaCentral(self):                                                                                                                                                      
 		from .lineaCentral import inicio_lc
 		return inicio_lc
+	def poligonos_enPartes(self):
+		from .poligono_enPartes import inicio_pP
+		return inicio_pP
 	def desc(self):
 		return """pyInegi en su modulo generalizar fue desarrollado por el departamento de Generalización del Instituto Nacional de Estadisitica y Geografia. CopyRight   INEGI@2024 """
 	def ayuda(self):
