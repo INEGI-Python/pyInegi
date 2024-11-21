@@ -1,7 +1,7 @@
 class Generalizar(object):
-	def __init__(self,**f):
-		self.param=f
-		self.eje = eval(self.param['func'])()
+	def __init__(self,**obj):
+		self.param=obj
+		self.eje = eval(f"self.{obj['func']}")()
 	def separaLineas(self):
 		from .separaLineas import inicio_sl
 		inicio_sl(self.param.values())
