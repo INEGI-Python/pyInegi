@@ -1,4 +1,4 @@
-from arcpy.management import FeatureToPolygon as f2p, MakeFeatureLayer as mFl,MultipartToSinglepart as mPsP, DeleteFeatures as dF, SelectLayerByAttribute as sByA, SelectLayerByLocation as sBy, Delete as d
+from arcpy.management import CreateFishnet as cFis,  PolygonToLine as p2L,  FeatureToPolygon as f2p, MakeFeatureLayer as mFl,MultipartToSinglepart as mPsP, DeleteFeatures as dF, SelectLayerByAttribute as sByA, SelectLayerByLocation as sBy, Delete as d
 from arcpy.da import UpdateCursor as uC, SearchCursor as sC
 from arcpy import env,  CreateCartographicPartitions_cartography as cCp
 from arcpy.analysis import Clip
@@ -24,16 +24,19 @@ def inicio_pP(a):
 		polTmp = f"{a.SRC}_toPolygon"
 	print(a.SRC,polTmp)
 	f2p(a.SRC,polTmp)
-	mFl(a.SRC,"layerIn")
+	mFl(a.SRC,"layerPol")
+	lineas = polTmp.replace("toPolygon","toLine")
+	p2L(polTmp,lineas)
+	mFl(lineas,"layerIn")
 	
 	#cont_vtx = len([json.loads(row[1]) for row in sC(a.SRC,['OID@','SHAPE@JSON'])][0]["paths"][0])
 	ini = avance("Cartografia Particiones",ini)
 	d(a.DEST)
-	cCp("layerIn","D:/misDocs/2025/Python/consumir-pyInegi/datos/tempo.shp",a.CANT,a.METH_PART)
+	cCp("layerPol","D:/misDocs/2025/Python/consumir-pyInegi/datos/tempo.shp",a.CANT,a.METH_PART)
 	#mFl(a.DEST,"tempo")
 	ini= avance("Eliminando poligonos exedentes",ini)
 	mFl("D:/misDocs/2025/Python/consumir-pyInegi/datos/tempo.shp","layerTmp")
-	sBy("layerTmp","INTERSECT","layerIn",1,"NEW_SELECTION","INVERT")
+	sBy("layerTmp","INTERSECT","layerPol",1,"NEW_SELECTION","INVERT")
 	dF("layerTmp")
 	ini = avance("Recortar la parte que sale del pais",ini)
 	Clip("layerTmp",polTmp,"D:/misDocs/2025/Python/consumir-pyInegi/datos/tempoClip.shp")
@@ -42,11 +45,10 @@ def inicio_pP(a):
 	mPsP("tempoClip",a.DEST)
 	ini = avance("Quitando poligonos muy pequeños",ini)
 	mFl(a.DEST,"destLayer")
-	sByA("destLayer","NEW_SELECTION","Shape_Length < 500")
+	sBy("destLayer","INTERSECT","layerIn",1,"NEW_SELECTION","INVERT")
 	dF("destLayer")
 	ini = avance("Fin",ini)
- 
- 
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Herramientas para dividir un poligono en muchos.')
 	parser.add_argument('GDB', type=str, help='GeodataBase origen')

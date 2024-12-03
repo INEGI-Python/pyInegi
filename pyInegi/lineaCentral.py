@@ -132,3 +132,8 @@ if __name__=='__main__':
 		print(eval(args.FEAT))
 	else:
 		inicio_lc(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP,dist=args.DIST,ver=args.VER)
+
+
+
+
+  ##https://samfrew.com/firmware/model/SM-A057M/upload/Desc/20/10
