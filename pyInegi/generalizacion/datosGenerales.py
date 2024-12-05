@@ -1,8 +1,7 @@
 
 def formato(msj, res, may=False):
 	a = msj.upper() if may else msj
-	a1 = {"sucesses":True,"message":a} if res=="json" else a
-	return a1
+	return {"sucesses":True,"message":a} if res=="json" else a
 
 def ayuda(_dat):
 	a = """ Aqui va la super ayuda de como usar la libreria usar las lineas que le sean posibles"""                     
