@@ -1,3 +1,4 @@
+import os
 class Generalizar(object):
 	def __init__(self,**obj):
 		self.param=obj
@@ -23,13 +24,10 @@ class Generalizar(object):
 		return inicio_pP
 	def desc(self):
 		return """pyInegi en su modulo generalizar fue desarrollado por el departamento de Generalización del Instituto Nacional de Estadisitica y Geografia. CopyRight   INEGI@2024 """
-	def ayuda(self,_dat):
-		a = """ Aqui va la super ayuda de como usar la libreria usar las lineas que le sean posibles"""                     
-		a1 = upper(a) if _dat["mayusculas"] else a
-		a2 = {"sucesses":True,"message":a1} if _dat['tipoRes']=="json" else a1 
-		return a2	 
-		
-			
+	def datosGenerales(self):
+		from .generalizacion.datosGenerales import inicio
+		return inicio
+
 
 
 
