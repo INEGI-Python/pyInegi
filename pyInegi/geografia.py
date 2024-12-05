@@ -22,8 +22,8 @@ class Generalizar(object):
 	def poligonos_enPartes(self):
 		from .poligono_enPartes import inicio_pP
 		return inicio_pP
-	def desc(self):
-		return """pyInegi en su modulo generalizar fue desarrollado por el departamento de Generalización del Instituto Nacional de Estadisitica y Geografia. CopyRight   INEGI@2024 """
+
+ 
 	def datosGenerales(self):
 		from .generalizacion.datosGenerales import inicio
 		return inicio
