@@ -10,8 +10,8 @@ def ayuda(_dat):
 
 def descripcion(_dat):
 	a ="""pyInegi es una libreria de código abierto para PYTHON desarrollada por el Instituto Nacional de Estadísitica y Geografía. INEGI. La cual cuadyuba a los ciudadanos 
-	mexicanos asi como al resto del mundo y sus alrededores a el proceda            CopyRight   INEGI@2024 """
+	mexicanos asi como al resto del mundo y sus alrededores a el proceda  CopyRight   INEGI@2024 """
 	return formato(a,*_dat.values()[1:])
 
-def inicio(datos):
+def inicio(**datos):
     return eval(f"{datos['tipo']}({datos})")
