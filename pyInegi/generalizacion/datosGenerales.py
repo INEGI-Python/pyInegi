@@ -6,4 +6,4 @@ def ayuda(_dat):
 	return a2
 
 def inicio(datos):
-    return eval(f"{datos['tipo']}")(datos)
+    return eval(f"{datos['tipo']}({datos})")
