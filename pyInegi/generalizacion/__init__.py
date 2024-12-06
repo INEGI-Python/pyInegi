@@ -1,2 +1,5 @@
-from  .datosGenerales import *
+from .datosGenerales import *
+from .lineaCentral import *
+
+
 
