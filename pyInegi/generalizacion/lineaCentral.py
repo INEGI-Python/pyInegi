@@ -121,13 +121,12 @@ def inicio_lc(**_d):
 	if _d["ver"]==1:
 		m1 = _todo.explore(tooltip=True,name="Linea Central")		
 		m2 = voro1.explore(m=m1,tooltip=True,name="Linea Central Quick")
-		
 		m3 = _data.explore(m=m2,name="Poligonos",color="red")
 		folium.TileLayer("OpenStreetMap",show=True).add_to(m3)
 		folium.LayerControl().add_to(m3)
-		m3
-		#m3.show_in_browser()
-
+		m3.show_in_browser()
+	elif _d["ver"]==2:
+		_todo.plot()
 
 
 if __name__=='__main__':
