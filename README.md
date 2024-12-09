@@ -7,7 +7,7 @@ Esta libreria fue creada por el Instituto Nacional de Estadisticas y Geografia
 Instalación
 =====
 
-			pip install  github+https://github.com/INEGI-Python/pyInegi.git
+			pip install  git+https://github.com/INEGI-Python/pyInegi.git
 
 USO
 =====
