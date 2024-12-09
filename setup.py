@@ -22,7 +22,8 @@ setuptools.setup(
 		'httpimport>=1.4.0',
 		'geopandas>=1.0.1',
 		'requests>=2.32.3',
-		'shapely>=2.0.6'
+		'shapely>=2.0.6',
+        'scipy>=1.14.1'
     ],
     extras_require={
         'lark-parser': ["regex"]
