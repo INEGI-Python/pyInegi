@@ -7,6 +7,16 @@ from shapely.geometry import LineString,MultiLineString,shape
 from scipy.spatial import Voronoi
 import argparse 
 
+def validar(inputfile):
+	if inputfile != "_":
+		if inputfile[-3:]=="gdb":
+			if not os.path.isdir(inputfile):
+				raise argparse.ArgumentTypeError('La geodatabase no existe')
+		elif not os.path.isfile(inputfile):
+			raise argparse.ArgumentTypeError('El archivo no existe')
+	return inputfile
+
+
 class Centro(object):
 		def __init__(self, inputGEOM, dist):
 			self.inputGEOM = inputGEOM
@@ -118,10 +128,11 @@ def inicio_lc(**_d):
 		m3.show_in_browser()
 
 
+
 if __name__=='__main__':
 	parser = argparse.ArgumentParser(description="Devuelve la línea central de un polígono")
-	parser.add_argument('GDB',type=str, help="Ruta absoluta o relativa  de  una Geodatabase o un Shapefile")
-	parser.add_argument('FEAT',type=str,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
+	parser.add_argument(dest='GDB',action='store', required=True, type=validar, help="Ruta absoluta o relativa  de  una Geodatabase o un Shapefile")
+	parser.add_argument(dest='FEAT',action='store', type=validar,  nargs='?', default="fiona.listlayers(args.GDB)", help="Nombre del Featureclass o coloques un guion bajo (_) si no aplica. Si lo omite, el sistema le mostrara un listado de los featuresClass que contiene su geodatabase")
 	parser.add_argument("CAMP",type=str, nargs='?', default=["*"], help="Arreglo de campos a obtener de sus datos")
 	parser.add_argument("DIST",type=int, nargs='?', default=10, help="Distancia entre vertices para la densificación")
 	parser.add_argument("VER",type=int, nargs='?', default=1, help="Genera y muestra un Mapa con el resultado. Default: 1")
