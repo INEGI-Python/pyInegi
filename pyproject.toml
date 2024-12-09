@@ -5,7 +5,7 @@ requires = [
 ]
 build-backend="setuptools.build_meta"
 
-[tool.setuptools.build]
+[tool.setuptools.setup]
 script = "setup.py"
 generate-setup-file = false
 
@@ -18,7 +18,8 @@ dependencies = [
     "folium",
     "mapclassify",
     "shapely",
-    "httpimport"
+    "httpimport",
+    "scipy"
 ]
 
 [project]
