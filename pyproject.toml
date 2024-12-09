@@ -24,8 +24,6 @@ dependencies = [
 [project]
 name="pyInegi"
 version="1.0.0"
-autor="INEGI"
-fecha="2024"
 
 
 
