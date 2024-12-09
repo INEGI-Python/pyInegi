@@ -14,7 +14,7 @@ USO
 
 La libreria esta dividida en dos clases llamadas geografia y estadistica
 
-	Clase geografia
-======
+Clase geografia
+===
 
 	pyInegi --help
