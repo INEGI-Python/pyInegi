@@ -6,9 +6,9 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="pyInegi",
     version="0.1.1",
-    author="Instituto Nacional de Estadistica y  Geografía",
+    author="Instituto Nacional de Estadística y  Geografía",
     author_email="inegi.soporte@inegi.org.mx",
-    description="Aplicacion para el tratamiento de informacion estadistica y geografica",
+    description="Aplicacion para el tratamiento de información estadística y geográfica",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/INEGI-Python/pyInegi.git",
@@ -16,7 +16,7 @@ setuptools.setup(
     scripts=["inicio.py"],
     install_requires=[
         'numpy>=2.1.1',
-        'matplotlib>=3',                                   
+        'matplotlib>=3',
         'folium>=0.17.0',
 		'mapclassify>=2.8.0',
 		'httpimport>=1.4.0',
