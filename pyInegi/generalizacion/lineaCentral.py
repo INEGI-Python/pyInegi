@@ -125,7 +125,8 @@ def inicio_lc(**_d):
 		m3 = _data.explore(m=m2,name="Poligonos",color="red")
 		folium.TileLayer("OpenStreetMap",show=True).add_to(m3)
 		folium.LayerControl().add_to(m3)
-		m3.show_in_browser()
+		m3
+		#return m3.show_in_browser()
 
 
 
@@ -142,7 +143,7 @@ if __name__=='__main__':
 		import fiona
 		print(eval(args.FEAT))
 	else:
-		inicio_lc(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP,dist=args.DIST,ver=args.VER)
+		print(inicio_lc(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP,dist=args.DIST,ver=args.VER))
 
 
 
