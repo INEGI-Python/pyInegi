@@ -126,7 +126,7 @@ def inicio_lc(**_d):
 		folium.TileLayer("OpenStreetMap",show=True).add_to(m3)
 		folium.LayerControl().add_to(m3)
 		m3
-		#return m3.show_in_browser()
+		#m3.show_in_browser()
 
 
 
