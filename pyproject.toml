@@ -3,7 +3,12 @@ requires = [
     "setuptools>=42",
     "wheel"
 ]
-build-backend="setuptools.buil-meta"
+build-backend="setuptools.build-meta"
+
+[tool.setuptools.build]
+script = "setup.py"
+generate-setup-file = false
+
 dependencies = [
     "requests",
     "pandas",
