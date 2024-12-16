@@ -1,0 +1,11 @@
+numpy
+matplotlib
+folium
+mapclassify
+httpimport
+geopandas
+requests
+shapely
+scipy
+euclid3
+fiona

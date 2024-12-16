@@ -6,11 +6,23 @@ import folium
 from shapely.geometry import LineString,MultiLineString,shape
 from scipy.spatial import Voronoi
 import argparse 
+from multiprocessing import Pool
+
+
+
+def renombrar(name):
+	noms = name.split(".")
+	if os.path.exists(name):
+		newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
+		return f"{newName}.{noms[1]}"
+	else:
+		return name
+
 
 class Centro(object):
-		def __init__(self, inputGEOM, dist):
+		def __init__(self, inputGEOM,dis):
 			self.inputGEOM = inputGEOM
-			self.dist = abs(dist)
+			self.dist=abs(dis)
 
 		def createCenterline(self):
 			minx = int(min(self.inputGEOM.envelope.exterior.xy[0]))
@@ -75,47 +87,59 @@ class Centro(object):
 			return linea_central,linea_central2.simplify(0.1)
 
 
-def renombrar(name):
-	noms = name.split(".")
-	if os.path.exists(name):
-		newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
-		return f"{newName}.{noms[1]}"
-	else:
-		return name
+
+def multi(d):
+	print(f"[{os.getpid()}]")
+	cen = Centro(d,15)
+	return cen.dist
 
 def inicio_lc(**_d):
 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
 	CRS = _data.crs.to_string()
 	_data.plot()
-	pol,_result,id=1,[],1
 	if not os.path.exists("DatosSalida"): 
 		os.mkdir("DatosSalida")
-	voroCen = open(renombrar("DatosSalida/voroCen.geojson"),"w")
-	features=[]
-	for d in _data.geometry:
-		cen = Centro(d,_d["dist"])
-		Multi,Multi2=cen.obtener_linea_central_voronoi()
-		features.append({"type":"Feature","properties":{"id":pol},"geometry":Multi2.__geo_interface__})
-		tmp=cen.createCenterline()
-		for geo in tmp:
-			_result.append({"id":id,"pol":pol,"geometry":geo,"crs":CRS})
-			id+=1
-		pol+=1
-	geoms = [shape(f['geometry']) for f in features]
-	voro1 = pan.GeoDataFrame({'geometry':geoms})
-	print(voro1)
-	voroCen.write(json.dumps({"type":"FeatureCollection","crs":{"type":"EPSG","properties":{"code":6372,"coordinate_order":[1,0]}} ,"features":features}))
-	voroCen.close()
-	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
-	_todo.to_file(renombrar("DatosSalida/centerLineSalida.shp"))
-	if _d["ver"]==1:
-		m1 = _todo.explore(tooltip=True,name="Linea Central")		
-		m2 = voro1.explore(m=m1,tooltip=True,name="Linea Central Quick")
+	const = open("DatosSalida/constantes.json","w")
+	const.write(json.dumps({"cant":len(_data.geometry),"dist":_d["dist"]}))
+	const.close()
+	with Pool() as pool:
+		array_result = pool.map(multi,_data.geometry)
+		print(array_result)
+
+
+# def inicio_lc___(**_d):
+# 	_data = pan.read_file(_d["gdb"],layer=_d["feat"]) if _d["gdb"][-3:]=="gdb" else   pan.read_file(_d["gdb"])
+# 	CRS = _data.crs.to_string()
+# 	_data.plot()
+# 	pol,_result,id=1,[],1
+# 	if not os.path.exists("DatosSalida"): 	
+# 		os.mkdir("DatosSalida")
+# 	voroCen = open(renombrar("DatosSalida/voroCen.geojson"),"w")
+# 	features=[]
+# 	for d in _data.geometry:
 		
-		m3 = _data.explore(m=m2,name="Poligonos",color="red")
-		folium.TileLayer("OpenStreetMap",show=True).add_to(m3)
-		folium.LayerControl().add_to(m3)
-		m3.show_in_browser()
+# 		Multi,Multi2=cen.obtener_linea_central_voronoi()
+# 		features.append({"type":"Feature","properties":{"id":pol},"geometry":Multi2.__geo_interface__})
+# 		tmp=cen.createCenterline()
+# 		for geo in tmp:
+# 			_result.append({"id":id,"pol":pol,"geometry":geo,"crs":CRS})
+# 			id+=1
+# 		pol+=1
+# 	geoms = [shape(f['geometry']) for f in features]
+# 	voro1 = pan.GeoDataFrame({'geometry':geoms})
+# 	print(voro1)
+# 	voroCen.write(json.dumps({"type":"FeatureCollection","crs":{"type":"EPSG","properties":{"code":6372,"coordinate_order":[1,0]}} ,"features":features}))
+# 	voroCen.close()
+# 	_todo=pan.GeoDataFrame(data=_result,crs=CRS)
+# 	_todo.to_file(renombrar("DatosSalida/centerLineSalida.shp"))
+# 	if _d["ver"]==1:
+# 		m1 = _todo.explore(tooltip=True,name="Linea Central")		
+# 		m2 = voro1.explore(m=m1,tooltip=True,name="Linea Central Quick")
+		
+# 		m3 = _data.explore(m=m2,name="Poligonos",color="red")
+# 		folium.TileLayer("OpenStreetMap",show=True).add_to(m3)
+# 		folium.LayerControl().add_to(m3)
+# 		m3.show_in_browser()
 
 
 if __name__=='__main__':
