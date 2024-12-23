@@ -275,7 +275,7 @@ def intersection_points(lines1, lines2=None, tolerance=0., min_spacing=0):
     :param lines2: MultiLineString or list of lines, if None find intersections amongst lines1
     :return:        list with shapely points of intersection
     """
-    points = []
+    points,ids = [],[]
     tree_idx_pnt = rtree.index.Index()
     ipnt = 0
 
@@ -324,10 +324,12 @@ def intersection_points(lines1, lines2=None, tolerance=0., min_spacing=0):
                         ipnt += 1
                         tree_idx_pnt.insert(ipnt, pnt.buffer(min_spacing).bounds)
                         points.append(pnt)
+                        ids.append(i1)
                 else:
                     points.append(pnt)
+                    ids.append(i1)
 
-    return points
+    return points,ids
 
 
 def cap_lines(line, offset=0., length=1.):

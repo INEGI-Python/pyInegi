@@ -1,9 +1,12 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel"
+    "setuptools"
 ]
-build-backend="setuptools.buil-meta"
+build-backend="setuptools.build_meta"
+
+[project]
+name = "pyInegi"
+version = "1.0.0"
 dependencies = [
     "requests",
     "pandas",
@@ -13,14 +16,6 @@ dependencies = [
     "folium",
     "mapclassify",
     "shapely",
-    "httpimport"
+    "httpimport",
+    "scipy"
 ]
-
-[project]
-name="pyInegi"
-version="1.0.0"
-autor="INEGI"
-fecha="2024"
-
-
-
