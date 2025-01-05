@@ -6,7 +6,7 @@ import numpy as np
 from multiprocessing import Pool
 import json
 import argparse
-from pyInegi.shapely_tools import intersection_points
+from pyInegi.shapely_tools3 import intersection_points
 import matplotlib.pyplot as plt
 
 def renombrar(name):
@@ -22,26 +22,29 @@ def enParalelo(polOrig):
 	from variables import parametros as p, CRS
 	ini=t()
 	idPol = polOrig[0]
-	print(f"[PID: {os.getpid()}] Poligono: {idPol}...",end="")
+	print(f"[PID: {os.getpid()}] Poligono: {idPol}...")
 	geomOrig = polOrig[1]["geometry"]
 	geomOrig = geomOrig.buffer(0)
 	segm = geomOrig.segmentize(p['dist'])
 	df_segm = geopandas.GeoDataFrame(geometry=[segm.buffer(0)],crs=CRS)
 	voroPoly = df_segm.voronoi_polygons()
 	borde = segm.boundary
-	voroClip=voroPoly.boundary.clip(geomOrig)
-	union = voroClip.union_all()
-	sept = list(union.geoms) 
-	DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
-	DFclip.set_index('id',inplace=True)
-	a,b = intersection_points(DFclip.index,DFclip.values,borde,0.1)
+	DFclip=voroPoly.boundary.clip(geomOrig)
+	print(DFclip.value_counts())
+	#sept = list(union.geoms) 
+	#DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
+	#print(DFclip)
+	#DFclip.set_index('id',inplace=True)
+	a,b = intersection_points(DFclip.index,DFclip.geoms,borde,0.1)
 	centrales = DFclip.drop(index=b)
 	centrales['geometry'] = centrales.union_all()
 	pegar = centrales.line_merge()
 	_geoms = pegar.simplify(tolerance=p['dist']*0.51)
 	#_geoms = [g for g in _geoms.values]
-	print("... %.3f " % float(t()-ini))
-	return list(_geoms.values)
+	print("...Pol: %d  ->  Tiempo: %.3f seg." % (idPol,float(t()-ini)))
+	print(len(_geoms.values))
+	print(_geoms.count_geometries())
+	return _geoms.values
 
 
 def inicio(a):
@@ -57,14 +60,17 @@ def inicio(a):
 	_ge=[]
 	with Pool() as pool:
 		temp = pool.map(enParalelo,orig.iterrows())
+		print(type(temp))
 		for tt in temp:
 			_ge+=tt
-		voroDF = geopandas.GeoDataFrame(geometry=_ge,crs=CRS)
+		arr = np.asarray(_ge)
+		voroDF = geopandas.GeoDataFrame(geometry=arr,crs=CRS)
 		#bordeTot = orig.boundary
 		#bordeTot.to_file(renombrar("DatosSalida/borde.shp"))
-		voroDF.to_file(renombrar("DatosSalida/noRepeat.shp"))
+		voroDF.to_file(renombrar("DatosSalida/lineaCentral.shp"))
 		#voroDF.plot()
 		#plt.show()
+	exit(1)
 
 
 
