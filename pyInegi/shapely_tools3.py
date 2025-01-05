@@ -288,7 +288,7 @@ def intersection_points(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
     
     # create multilinestring of close-by lines
     for i1, l1 in zip(ids1,lines1):
-        l1 = l1[0]
+        #l1 = l1[0]
         if lines2 is None:
             # find close-by lines based on bounds with spatial index
             hits = list(tree_idx.intersection(lines_bbox[i1]))
