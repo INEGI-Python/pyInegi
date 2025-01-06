@@ -1,7 +1,7 @@
 {
 	"cSpell.words": [
-		"linea",
-		"lineas",
+		"linea","Cualquier","ruta","prueba","Longitud","Cantidad","segmentar","registros","usar","Generalizar",
+		"lineas","idioma","MOPIGMA","Intersecciones","parametros","indice","sindex",
 		"voro",
 		"segm",
 		"inicio",
@@ -20,7 +20,20 @@
 		"Centro",
 		"borde",
 		"linestrings",
-		"renombrar"
+		"renombrar",
+		"puntos",
+		"punto",
+		"puntos",
+		"Inegi",
+		"Paralelo",
+		"Fclip",
+		"getpid",
+		"Centrales",
+		"pegar",
+		"Tiempo",
+		"argumentos",
+		"Regresa"
+
 	],
 	"python.analysis.autoImportCompletions": true,
 	"python.testing.unittestArgs": [

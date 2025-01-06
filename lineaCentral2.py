@@ -107,7 +107,7 @@ def inicio(a):
 	
 	# #geopandas.GeoDataFrame({"geometry":shapely.linestrings(x_lin_ext),"crs":CRS}).to_file("DatosSalida/LineaExt.shp")
 	# inter=capa1.intersects(x_lin_ext)
-	# #print(inter)
+	print("%.3f" % float(t()-ini))
 	# eliminar = [i for i,n in enumerate(inter) if n]
 	# print(eliminar)
 	# capa1.drop(index=eliminar)
@@ -134,11 +134,11 @@ def inicio(a):
     #     _df.to_file(renombrar("DatosSalida/centerSalida.shp"))
 
 class argumentos:
-	def __init__(self,f,r,d):
+	def __init__(self,f,d,r):
 		self.file=f
 		self.rows=r
 		self.dist=d
-args = argumentos("prueba3.shp",2,5)
+args = argumentos("prueba3.shp",10,10)
 inicio(args)
 
 if False: # __name__ == "__main__":

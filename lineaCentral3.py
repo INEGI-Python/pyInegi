@@ -6,6 +6,8 @@ import numpy as np
 from multiprocessing import Pool
 import json
 import argparse
+
+from shapely import LineString, linestrings
 from pyInegi.shapely_tools3 import intersection_points
 import matplotlib.pyplot as plt
 
@@ -26,24 +28,25 @@ def enParalelo(polOrig):
 	geomOrig = polOrig[1]["geometry"]
 	geomOrig = geomOrig.buffer(0)
 	segm = geomOrig.segmentize(p['dist'])
-	df_segm = geopandas.GeoDataFrame(geometry=[segm.buffer(0)],crs=CRS)
+	df_segm = geopandas.GeoDataFrame(geometry=[segm],crs=CRS)
 	voroPoly = df_segm.voronoi_polygons()
 	borde = segm.boundary
 	DFclip=voroPoly.boundary.clip(geomOrig)
-	print(DFclip.value_counts())
-	#sept = list(union.geoms) 
-	#DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
+	#print(DFclip.value_counts())
+	union = DFclip.union_all()
+	sept = list(union.geoms) 
+	DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
 	#print(DFclip)
-	#DFclip.set_index('id',inplace=True)
-	a,b = intersection_points(DFclip.index,DFclip.geoms,borde,0.1)
+	DFclip.set_index('id',inplace=True)
+	a,b = intersection_points(DFclip.index,DFclip.values,borde,0.1)
 	centrales = DFclip.drop(index=b)
-	centrales['geometry'] = centrales.union_all()
-	pegar = centrales.line_merge()
-	_geoms = pegar.simplify(tolerance=p['dist']*0.51)
-	#_geoms = [g for g in _geoms.values]
+	union = centrales.union_all()
+	u = geopandas.GeoSeries([union])
+	unir = u.line_merge()
+	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
+	#pegar = tempo.line_merge()
+	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
 	print("...Pol: %d  ->  Tiempo: %.3f seg." % (idPol,float(t()-ini)))
-	print(len(_geoms.values))
-	print(_geoms.count_geometries())
 	return _geoms.values
 
 
@@ -53,10 +56,9 @@ def inicio(a):
 	orig.set_index("OBJECTID",inplace=True)
 	indice=orig.sindex
 	CRS = orig.crs.to_string()
-	_var = open("variables.py","w")
-	_var.write(f"parametros = {json.dumps({'file':a.file,'dist':a.dist,'rows':a.rows})} \n")
-	_var.write(f"CRS='{CRS}'")
-	_var.close()
+	with open("variables.py", "w") as _var:
+		_var.write(f"parametros = {json.dumps({'file':a.file,'dist':a.dist,'rows':a.rows})} \n")
+		_var.write(f"CRS='{CRS}'")
 	_ge=[]
 	with Pool() as pool:
 		temp = pool.map(enParalelo,orig.iterrows())
@@ -70,7 +72,7 @@ def inicio(a):
 		voroDF.to_file(renombrar("DatosSalida/lineaCentral.shp"))
 		#voroDF.plot()
 		#plt.show()
-	exit(1)
+	print("TIEMPO TOTAL: %.3f " % float(t()-t1))
 
 
 

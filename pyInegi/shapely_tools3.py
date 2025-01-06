@@ -288,7 +288,7 @@ def intersection_points(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
     
     # create multilinestring of close-by lines
     for i1, l1 in zip(ids1,lines1):
-        #l1 = l1[0]
+        l1 = l1[0]
         if lines2 is None:
             # find close-by lines based on bounds with spatial index
             hits = list(tree_idx.intersection(lines_bbox[i1]))
@@ -303,35 +303,38 @@ def intersection_points(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
             l1 = extend_line(l1, tolerance)
 
         x = l1.intersection(lines_hit)
-        if not x.is_empty:
-            if isinstance(x, Point):
-                pnts = [x]
+        try:
+            if not x.is_empty:
+                if isinstance(x, Point):
+                    pnts = [x]
 
-            else:
-                if isinstance(x, MultiPoint):
-                    pnts = [Point(geom) for geom in x.__geo_interface__["coordinates"]]
-                elif isinstance(x, (MultiLineString, MultiPolygon, GeometryCollection)):
-                    pnts = [Point(coords) for geom in x for coords in geom.coords]
-                elif isinstance(x, (LineString, Polygon)):
-                    pnts = [Point(coords) for coords in x.coords]
                 else:
-                    raise NotImplementedError('intersection yields bad type')
-
-            for pnt in pnts:
-                if min_spacing > 0:
-                    if ipnt > 0:
-                        hits = list(tree_idx_pnt.intersection(pnt.bounds))
+                    if isinstance(x, MultiPoint):
+                        pnts = [Point(geom) for geom in x.__geo_interface__["coordinates"]]
+                    elif isinstance(x, (MultiLineString, MultiPolygon, GeometryCollection)):
+                        pnts = [Point(coords) for geom in x for coords in geom.coords]
+                    elif isinstance(x, (LineString, Polygon)):
+                        pnts = [Point(coords) for coords in x.coords]
                     else:
-                        hits = []
+                        raise NotImplementedError('intersection yields bad type')
 
-                    if len(hits) == 0:  # no pnts within spacing
-                        ipnt += 1
-                        tree_idx_pnt.insert(ipnt, pnt.buffer(min_spacing).bounds)
+                for pnt in pnts:
+                    if min_spacing > 0:
+                        if ipnt > 0:
+                            hits = list(tree_idx_pnt.intersection(pnt.bounds))
+                        else:
+                            hits = []
+
+                        if len(hits) == 0:  # no pnts within spacing
+                            ipnt += 1
+                            tree_idx_pnt.insert(ipnt, pnt.buffer(min_spacing).bounds)
+                            points.append(pnt)
+                            ids.append(i1)
+                    else:
                         points.append(pnt)
                         ids.append(i1)
-                else:
-                    points.append(pnt)
-                    ids.append(i1)
+        except:
+            pass
 
     return points,ids
 
