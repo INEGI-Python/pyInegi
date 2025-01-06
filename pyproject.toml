@@ -1,5 +1,6 @@
 [build-system]
 requires = [
+    "--upgrade pip",
     "setuptools"
 ]
 build-backend="setuptools.build_meta"
@@ -17,5 +18,6 @@ dependencies = [
     "mapclassify",
     "shapely",
     "httpimport",
-    "scipy"
+    "scipy",
+    "rtree",
 ]

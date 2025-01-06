@@ -7,8 +7,8 @@ from arcpy.management import CopyFeatures as cpF, FeatureVerticesToPoints as fV,
 from arcpy import SpatialReference as sPt, Point as pt, Geometry as _aG, Array as aa
 from multiprocessing import cpu_count,Pool
 import argparse 
-from .funciones import  *
-from .polyskel import skeletonize
+from ..funciones import  *
+from ..polyskel import skeletonize
 
 
 def memory_usage_psutil():
