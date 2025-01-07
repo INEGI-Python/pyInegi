@@ -7,15 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyInegi"
-authors = [
-    {name = "INEGI", email = "inegi@inegi.org.mx"},
-    {name = "Genertalizacion", email = "generalizacion@inegi.org.mx"},
-]
-readme = "README.md"
-requires-python = ">=3.7"
-classifiers = ["License :: OSI Approved :: MIT License"]
-dynamic = ["version", "description"]
-
+version = "2024.0.0"
 dependencies =  [
     "numpy>=2.1.1",
     "matplotlib>=3.9.2",
@@ -30,4 +22,18 @@ dependencies =  [
     "euclid3>=0.1",
     "rtree >= 1.0.1"
 ]
+requires-python = ">=3.7"
+authors = [
+    {name = "INEGI", email = "inegi@inegi.org.mx"},
+    {name = "Genertalizacion", email = "generalizacion@inegi.org.mx"},
+]
+description = "México cuenta con el INEGI ahora en PYTHON"
+readme = "README.md"
+license = {text = "MIT License"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
 
+[project.urls]
+Homepage = "https://inegi.org.mx"
+Documentation = "https://inegi.org.mx/desarrolladores/apis/pyInegi"
+Repository = "https://github.com/INEGI-Python/pyInegi.git"
