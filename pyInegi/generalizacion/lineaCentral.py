@@ -3,7 +3,7 @@ from time import time as t
 import folium
 import geopandas
 import numpy as np
-from multiprocessing import Pool
+from multiprocessing import Pool, freeze_support
 import json
 import argparse
 from shapely import LineString
@@ -47,8 +47,9 @@ def enParalelo(polOrig):
 	return _geoms.values
 
 
-def inicio(a):
-	print(a)
+def inicio(**a):
+	print(" OBTENIENDO LINEAS CENTRALES.... ")
+	print(f"parametros: {json.dumps(a,indent=4)}")
 	t1=t()
 	orig =  geopandas.read_file(a["file"],rows=None if a["rows"]==-1 else a["rows"], columns=["geometry"])
 	indice=orig.sindex
@@ -79,6 +80,7 @@ def inicio(a):
 
 
 if __name__ == "__main__":
+	freeze_support()
 	args = argparse.ArgumentParser(description="Regresa  las lineas centrales de cualquier poligono en formato shape")
 	args.add_argument("file",type=str,help="Ruta de la capa de poligonos")
 	args.add_argument("dist",type=int,nargs="?",default=10,help="Longitud maxima de las lineas al segmentar los poligonos. DEFAULT 10m")

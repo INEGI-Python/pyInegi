@@ -1,5 +1,5 @@
-from .geografia import Generalizar,lineaCentral,separaLineas,datosGenerales
+from .generalizacion import lineaCentral
 from  .basico import *
 __version__="1.0.0"
 
-__ALL__ = ["Generalizar","lineaCentral","separaLineas","datosGenerales"]
+__ALL__ = ["lineaCentral"]
