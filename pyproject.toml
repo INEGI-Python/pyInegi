@@ -1,23 +1,31 @@
 [build-system]
 requires = [
-    "--upgrade pip",
-    "setuptools"
+    "setuptools",
 ]
-build-backend="setuptools.build_meta"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyInegi"
-version = "1.0.0"
-dependencies = [
-    "requests",
-    "pandas",
-    "numpy",
-    "matplotlib",
-    "geopandas",
-    "folium",
-    "mapclassify",
-    "shapely",
-    "httpimport",
-    "scipy",
-    "rtree",
+authors = [
+    {name = "INEGI", email = "inegi@inegi.org.mx"},
+    {name = "Genertalizacion", email = "generalizacion@inegi.org.mx"},
+]
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
+
+dependencies =  "requeriments.txt"
+
+[project.optional-dependencies]
+test = [
+    "black==21.9b0",
+    "pre-commit==2.15.0",
+    "mypy==0.910",
+    "pytest==6.2.5",
+    "pytest-cov==3.0.0",
+]
+
+deploy = [
+    "flit==3.4.0",
 ]
