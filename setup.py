@@ -6,6 +6,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'setuptools',
+        'wheel',
     ],
     install_requires=[
         'numpy>=2.1.1',
