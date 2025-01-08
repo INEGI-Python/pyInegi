@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 def registrar(name,registro,pols={'cont':-1}):
 	if pols['cont']==-1: return 0 
 	with open(name,"+a") as reg:
-		reg.write(f"{registro} \n")
+		reg.write(f"{registro}")
 		reg.close()
 		if pols['cont'] % 1000 == 0:
 			print(f"[{pols['cont']}]")
@@ -51,7 +51,7 @@ def enParalelo(polOrig):
 	unir = u.line_merge()
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
-	reg_pol = f"[PID: {os.getpid()}] Poligono: {idPol}"+"->"+"Tiempo: %.3f seg. \n" % float(t()-ini)
+	reg_pol = f"[{pols['cont']} de  {pols['total']}]  PID: {os.getpid()} --  ID Pol: {idPol}"+" -- "+"Tiempo: %.3f seg. \n" % float(t()-ini)
 	pols['cont'] = registrar("registros.log",reg_pol,pols)
 	return _geoms.values
 
@@ -65,7 +65,6 @@ def inicio(**a):
 	indice=orig.sindex
 	CRS = orig.crs.to_string()
 	with open("variables.py", "w") as _var:
-		print(a)
 		_var.write(f"parametros = {json.dumps(a)} \n")
 		_var.write(f"CRS='{CRS}'\n")
 		p = {'total':orig.index.stop,'cont':1}
