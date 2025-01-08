@@ -10,7 +10,7 @@ from shapely import LineString
 from pyInegi.shapely_tools3 import intersection_points
 import matplotlib.pyplot as plt
 
-log = open("registros.log","a+")
+log = open("registros.log","w")
 
 def renombrar(name):
 	noms = name.split(".")
@@ -71,8 +71,9 @@ def inicio(**a):
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
 		result = renombrar("DatosSalida/lineaCentral.shp")
 		voroDF.to_file(result)
-	log.close()
 	print("TIEMPO TOTAL: %.3f " % float(t()-t1))
+	log.write("TIEMPO TOTAL: %.3f " % float(t()-t1))
+	log.close()
 	print(f"Las líneas Centrales resultantes se encuentran en la siguiente ruta: {os.getcwd().replace("\\","/")}/{result}")
 	if a["web"]==1:
 		m0 = bordeTot.explore(name="Poligonos Exteriores",color="red")
