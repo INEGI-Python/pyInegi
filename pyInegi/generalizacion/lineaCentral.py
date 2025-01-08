@@ -10,7 +10,15 @@ from shapely import LineString
 from pyInegi.shapely_tools3 import intersection_points
 import matplotlib.pyplot as plt
 
-log = open("registros.log","w")
+
+def registrar(name,registro,pols=False):
+	if pols: return 
+	with open(name,"+a") as reg:
+		reg.write(f"{registro} \n")
+		reg.close()
+		if pols['cont'] % 1000 == 0:
+			print(f"[{pols['cont']}]")
+		return pols['cont']+1
 
 def renombrar(name):
 	noms = name.split(".")
@@ -22,7 +30,7 @@ def renombrar(name):
 
 
 def enParalelo(polOrig):
-	from variables import parametros as p, CRS
+	from variables import parametros as p, CRS, poligonos as pols
 	ini=t()
 	idPol = polOrig[0]
 	geomOrig = polOrig[1]["geometry"]
@@ -43,21 +51,24 @@ def enParalelo(polOrig):
 	unir = u.line_merge()
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
-	log.write(f"[PID: {os.getpid()}] Poligono: {idPol}...")
-	log.write("  ->  Tiempo: %.3f seg. \n" % float(t()-ini))
+	reg_pol = f"[PID: {os.getpid()}] Poligono: {idPol}"+"->"+"Tiempo: %.3f seg. \n" % float(t()-ini)
+	pols['cont'] = registrar("registros.log",reg_pol,pols)
 	return _geoms.values
 
 
 def inicio(**a):
 	print(" OBTENIENDO LINEAS CENTRALES.... ")
-	print(f"parametros: {json.dumps(a,indent=4)}")
+	print(f"Parametros: {json.dumps(a,indent=4)}")
+	print(f"\nCargando su archivo de datos, espere por favor....")
 	t1=t()
 	orig =  geopandas.read_file(a["file"],rows=None if a["rows"]==-1 else a["rows"], columns=["geometry"])
 	indice=orig.sindex
 	CRS = orig.crs.to_string()
 	with open("variables.py", "w") as _var:
-		_var.write(f"parametros = {json.dumps(a)} \n")
+		_var.write(f"parametros = {json.dumps(a,indent=4)} \n")
 		_var.write(f"CRS='{CRS}'")
+		_var.write(f"Poligonos = {json.dumps({"total":orig.count,"cont":0})}")
+		_var.close() 
 	_ge=[]
 	with Pool(a["cpu"]) as pool:
 		temp = pool.map(enParalelo,orig.iterrows())
@@ -71,9 +82,9 @@ def inicio(**a):
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
 		result = renombrar("DatosSalida/lineaCentral.shp")
 		voroDF.to_file(result)
-	print("TIEMPO TOTAL: %.3f " % float(t()-t1))
-	log.write("TIEMPO TOTAL: %.3f " % float(t()-t1))
-	log.close()
+	time_tot = "TIEMPO TOTAL: %.3f " % float(t()-t1)
+	print(time_tot)
+	registrar("registros.log",time_tot)
 	print(f"Las líneas Centrales resultantes se encuentran en la siguiente ruta: {os.getcwd().replace("\\","/")}/{result}")
 	if a["web"]==1:
 		m0 = bordeTot.explore(name="Poligonos Exteriores",color="red")
@@ -86,13 +97,15 @@ def inicio(**a):
 
 if __name__ == "__main__":
 	freeze_support()
-	args = argparse.ArgumentParser(description="Regresa  las lineas centrales de cualquier poligono en formato shape")
-	args.add_argument("file",type=str,help="Ruta de la capa de poligonos")
-	args.add_argument("dist",type=int,nargs="?",default=10,help="Longitud maxima de las lineas al segmentar los poligonos. DEFAULT 10m")
+	args = argparse.ArgumentParser(description="Regresa  las líneas centrales de cualquier polígono en formato shape")
+	args.add_argument("file",type=str,help="Ruta de la capa de polígonos")
+	args.add_argument("dist",type=int,nargs="?",default=10,help="Longitud máxima de las líneas al segmentar los polígonos. DEFAULT 10 m")
 	args.add_argument("cpu",type=int,nargs="?",default=os.cpu_count(),help=f"Cantidad de nucleos del procesador a utilizar de forma paralela. DEFAULT {os.cpu_count()} CPUs para  este equipo")
 	args.add_argument("web",type=int,nargs="?",default=0,help="Muestra el resultado en un sistema de información geográfica Web. DEFAULT 0 (Falso, No)")
 	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
 	args = args.parse_args()
+	log = open("registros.log","w")
+	log.close()
 	inicio(args)        
 
         
