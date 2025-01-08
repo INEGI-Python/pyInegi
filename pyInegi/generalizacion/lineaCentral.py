@@ -10,6 +10,7 @@ from shapely import LineString
 from pyInegi.shapely_tools3 import intersection_points
 import matplotlib.pyplot as plt
 
+log = open("registros.log","a+")
 
 def renombrar(name):
 	noms = name.split(".")
@@ -24,7 +25,6 @@ def enParalelo(polOrig):
 	from variables import parametros as p, CRS
 	ini=t()
 	idPol = polOrig[0]
-	print(f"[PID: {os.getpid()}] Poligono: {idPol}...")
 	geomOrig = polOrig[1]["geometry"]
 	geomOrig = geomOrig.buffer(0)
 	segm = geomOrig.segmentize(p['dist'])
@@ -43,7 +43,8 @@ def enParalelo(polOrig):
 	unir = u.line_merge()
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
-	print("...Pol: %d  ->  Tiempo: %.3f seg." % (idPol,float(t()-ini)))
+ log.write(f"[PID: {os.getpid()}] Poligono: {idPol}...")
+	log.write("  ->  Tiempo: %.3f seg. \n" % float(t()-ini))
 	return _geoms.values
 
 
@@ -70,6 +71,7 @@ def inicio(**a):
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
 		result = renombrar("DatosSalida/lineaCentral.shp")
 		voroDF.to_file(result)
+log.close()
 	print("TIEMPO TOTAL: %.3f " % float(t()-t1))
 	print(f"Las líneas Centrales resultantes se encuentran en la siguiente ruta: {os.getcwd().replace("\\","/")}/{result}")
 	if a["web"]==1:
