@@ -65,10 +65,13 @@ def inicio(**a):
 	indice=orig.sindex
 	CRS = orig.crs.to_string()
 	with open("variables.py", "w") as _var:
-		_var.write(f"parametros = {json.dumps(a,indent=4)} \n")
+		print(a)
+		_var.write(f"parametros = {json.dumps(a)} \n")
 		_var.write(f"CRS='{CRS}'")
-		p = {"total":orig.count(), "cont":0}
-		_var.write(f"Poligonos = {json.dumps(p,indent=4)}")
+		p = {}
+		p["total"]=orig.count()
+		p["cont"]=0
+		_var.write(f"Poligonos = {json.dumps(p)}")
 		_var.close() 
 	_ge=[]
 	with Pool(a["cpu"]) as pool:
