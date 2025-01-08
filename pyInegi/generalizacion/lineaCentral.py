@@ -65,6 +65,8 @@ def inicio(**a):
 		arr = np.asarray(_ge)
 		voroDF = geopandas.GeoDataFrame(geometry=arr,crs=CRS)
 		bordeTot = orig.boundary
+		if not os.path.exists("DatosSalida"):
+			os.mkdir("DatosSalida")
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
 		result = renombrar("DatosSalida/lineaCentral.shp")
 		voroDF.to_file(result)
