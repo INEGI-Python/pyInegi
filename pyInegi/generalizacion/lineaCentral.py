@@ -16,9 +16,9 @@ def registrar(name,registro,pols={'cont':-1}):
 	with open(name,"+a") as reg:
 		reg.write(f"{registro}")
 		reg.close()
-		if pols['cont'] % 1000 == 0:
+		if pols['cont'] % int(pols['total']/10) == 0:
 			print(f"[{pols['cont']}]")
-		return pols['cont']+1
+		return 1
 
 def renombrar(name):
 	noms = name.split(".")
@@ -52,11 +52,13 @@ def enParalelo(polOrig):
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
 	reg_pol = f"[{pols['cont']} de  {pols['total']}]  PID: {os.getpid()} --  ID Pol: {idPol}"+" -- "+"Tiempo: %.3f seg. \n" % float(t()-ini)
-	pols['cont'] = registrar("registros.log",reg_pol,pols)
+	pols['cont'] += registrar("registros.log",reg_pol,pols)
 	return _geoms.values
 
 
 def inicio(**a):
+	log = open("registros.log","w")
+	log.close()
 	print(" OBTENIENDO LINEAS CENTRALES.... ")
 	print(f"Parametros: {json.dumps(a,indent=4)}")
 	print(f"\nCargando su archivo de datos, espere por favor....")
@@ -105,8 +107,6 @@ if __name__ == "__main__":
 	args.add_argument("web",type=int,nargs="?",default=0,help="Muestra el resultado en un sistema de información geográfica Web. DEFAULT 0 (Falso, No)")
 	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
 	args = args.parse_args()
-	log = open("registros.log","w")
-	log.close()
 	inicio(args)        
 
         

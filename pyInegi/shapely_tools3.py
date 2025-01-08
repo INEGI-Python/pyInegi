@@ -313,7 +313,10 @@ def intersection_points(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
                 if isinstance(x, MultiPoint):
                     pnts = [Point(geom) for geom in x.__geo_interface__["coordinates"]]
                 elif isinstance(x, (MultiLineString, MultiPolygon, GeometryCollection)):
-                    pnts = [Point(coords) for geom in x for coords in geom.coords]
+                    try:
+                        pnts = [Point(coords) for geom in x for coords in geom.coords]
+                    except Exception as e:
+                        print(e)
                 elif isinstance(x, (LineString, Polygon)):
                     pnts = [Point(coords) for coords in x.coords]
                 else:
