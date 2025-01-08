@@ -67,7 +67,7 @@ def inicio(**a):
 	with open("variables.py", "w") as _var:
 		_var.write(f"parametros = {json.dumps(a,indent=4)} \n")
 		_var.write(f"CRS='{CRS}'")
-		_var.write(f"Poligonos = {json.dumps({"total":orig.count,"cont":0})}")
+		_var.write(f"Poligonos = {json.dumps(dict(total=orig.count,cont=0))}")
 		_var.close() 
 	_ge=[]
 	with Pool(a["cpu"]) as pool:
