@@ -43,7 +43,7 @@ def enParalelo(polOrig):
 	unir = u.line_merge()
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
- log.write(f"[PID: {os.getpid()}] Poligono: {idPol}...")
+	log.write(f"[PID: {os.getpid()}] Poligono: {idPol}...")
 	log.write("  ->  Tiempo: %.3f seg. \n" % float(t()-ini))
 	return _geoms.values
 
@@ -71,7 +71,7 @@ def inicio(**a):
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
 		result = renombrar("DatosSalida/lineaCentral.shp")
 		voroDF.to_file(result)
-log.close()
+	log.close()
 	print("TIEMPO TOTAL: %.3f " % float(t()-t1))
 	print(f"Las líneas Centrales resultantes se encuentran en la siguiente ruta: {os.getcwd().replace("\\","/")}/{result}")
 	if a["web"]==1:
