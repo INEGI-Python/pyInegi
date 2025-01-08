@@ -68,10 +68,8 @@ def inicio(**a):
 		print(a)
 		_var.write(f"parametros = {json.dumps(a)} \n")
 		_var.write(f"CRS='{CRS}'")
-		p = {}
-		p["total"]=orig.count()
-		p["cont"]=0
-		_var.write(f"Poligonos = {json.dumps(p)}")
+		p = {"total":orig.index.stop,"cont":0}
+		_var.write(f"Poligonos = {p}")
 		_var.close() 
 	_ge=[]
 	with Pool(a["cpu"]) as pool:
