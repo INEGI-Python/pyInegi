@@ -30,7 +30,7 @@ def renombrar(name):
 
 
 def enParalelo(polOrig):
-	from variables import parametros as p, CRS, poligonos as pols
+	from variables import parametros as p, CRS, Poligonos as pols
 	ini=t()
 	idPol = polOrig[0]
 	geomOrig = polOrig[1]["geometry"]
