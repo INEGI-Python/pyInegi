@@ -11,8 +11,8 @@ from pyInegi.shapely_tools3 import intersection_points
 import matplotlib.pyplot as plt
 
 
-def registrar(name,registro,pols=False):
-	if pols: return 
+def registrar(name,registro,pols={'cont':-1}):
+	if pols['cont']==-1: return 0 
 	with open(name,"+a") as reg:
 		reg.write(f"{registro} \n")
 		reg.close()
@@ -68,7 +68,7 @@ def inicio(**a):
 		print(a)
 		_var.write(f"parametros = {json.dumps(a)} \n")
 		_var.write(f"CRS='{CRS}'\n")
-		p = {'total':orig.index.stop,'cont':0}
+		p = {'total':orig.index.stop,'cont':1}
 		_var.write(f"Poligonos = {p}")
 		_var.close() 
 	_ge=[]
