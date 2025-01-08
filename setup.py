@@ -8,7 +8,7 @@ setup(
         'setuptools',
         'wheel',
     ],
-    install_requires=[
+    dependencies=[
         'numpy>=2.1.1',
         'matplotlib>=3.9.2',
         'folium>=0.17.0', 
