@@ -67,7 +67,7 @@ def inicio(**a):
 	with open("variables.py", "w") as _var:
 		print(a)
 		_var.write(f"parametros = {json.dumps(a)} \n")
-		_var.write(f"CRS='{CRS}'")
+		_var.write(f"CRS='{CRS}\n'")
 		p = {"total":orig.index.stop,"cont":0}
 		_var.write(f"Poligonos = {p}")
 		_var.close() 
