@@ -14,7 +14,7 @@ dependencies = [
     'httpimport',
     'geopandas',
     'requests',
-    'shapely'
+    'shapely',
     'scipy',
     'fiona',
     'euclid3',
