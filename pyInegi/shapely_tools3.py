@@ -316,7 +316,8 @@ def intersection_points(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
                     try:
                         pnts = [Point(coords) for geom in x for coords in geom.coords]
                     except Exception as e:
-                        print(e)
+                        print(i1,e)
+                        print(x)
                 elif isinstance(x, (LineString, Polygon)):
                     pnts = [Point(coords) for coords in x.coords]
                 else:
