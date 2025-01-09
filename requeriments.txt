@@ -1,5 +1,5 @@
 numpy
-matplotlib>
+matplotlib
 folium
 mapclassify
 httpimport
