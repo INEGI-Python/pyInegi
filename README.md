@@ -12,9 +12,10 @@ Instalación
 USO
 =====
 
- pyInegi</revision>  
-	------
-	<b>generalizacion</b>
+ pyInegi
+ 
+  	generalizacion
+  
             <b>lineaCentral(file=str,dist=int,cpu=int,web=int,rows=int)  -> String</b>
                     file: Ruta relativa o absoluta de la ubicacion de la fuente de datos (Polígonos). Tambien acepta URL.
                     dist: Distancia en metros minima que debera tener entre vertice y vertice en los poligonos. 
