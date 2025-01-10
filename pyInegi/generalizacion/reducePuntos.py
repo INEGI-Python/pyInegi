@@ -49,7 +49,7 @@ def crearMapa(**capas):
 	m2.show_in_browser()
 
 
-def inicio_rp(params):
+def inicio_rp(**params):
 	imp(params)
 	gdb = params['gdb']
 	feat = params['feat']

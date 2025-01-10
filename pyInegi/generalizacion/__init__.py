@@ -1,6 +1,7 @@
-from .lineaCentral import *
-from .datosGenerales import *
+from .lineaCentral import inicio
+from .datosGenerales import ayuda,descripcion
 from .reducePuntos import inicio_rp
+
 
 
 
