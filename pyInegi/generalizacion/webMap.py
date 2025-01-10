@@ -15,10 +15,6 @@ def inicio(**param):
 	capas[-1].show_in_browser()
     
 
-
-
-
-
 if __name__ == "__main__":
 	parser = ag.ArgumentParser(description="Genera un Mapa Web de las capas de datos que el usuario cargue. Soporta ShapeFile, FeatureClass, GeoJson ")
 	parser.add_argument('datos',type=str, help="Ruta absoluta o relativa  de las fuentes de Datos sepradas por comas")
@@ -41,3 +37,8 @@ if __name__ == "__main__":
 	else:
 		inicio(datos=datos,tipos=tipos,names=names,color=color)
 	
+
+
+
+
+	##  pyInegi.generalizacion.webMap(datos=["DatosSalida/borde.shp","DatosSalida/lineaCentral.shp"],tipos=["LINESTRING","LINESTRING"],names=["¨Poñigono manzanas","Lineas Centrales"],color=["red","blue"])

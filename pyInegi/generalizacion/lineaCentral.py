@@ -83,18 +83,18 @@ def inicio(**a):
 		if not os.path.exists("DatosSalida"):
 			os.mkdir("DatosSalida")
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
-		result = renombrar("DatosSalida/lineaCentral.shp")
+		result = renombrar("DatosSalida/lineaCentral.shp") 
 		voroDF.to_file(result)
 	time_tot = "TIEMPO TOTAL: %.3f " % float(t()-t1)
 	print(time_tot)
 	registrar("registros.log",time_tot)
-	print(f"Las líneas Centrales resultantes se encuentran en la siguiente ruta: {os.getcwd().replace("\\","/")}/{result}")
 	if a["web"]==1:
 		m0 = bordeTot.explore(name="Poligonos Exteriores",color="red")
 		m1 = voroDF.explore(m=m0,name="Lineas Centrales",color="black", tooltip=True)
 		folium.TileLayer("OpenStreetMap",show=True).add_to(m1)
 		folium.LayerControl().add_to(m1)
 		m1.show_in_browser()
+	return os.getcwd().replace("\\","/")+result
     
 
 
