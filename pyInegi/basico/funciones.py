@@ -1,9 +1,10 @@
 
+import contextlib
 from folium import Polygon
 import rtree,json
 from shapely import GeometryCollection, LineString, MultiLineString, MultiPoint, MultiPolygon, Point
 import numpy as np
-
+from time import time as t,localtime as lc
 
 def shift_point(c1, c2, offset):
     """
@@ -12,7 +13,7 @@ def shift_point(c1, c2, offset):
     try:
         x1, y1 = c1
         x2, y2 = c2
-    except:
+    except Exception:
         print(c1, c2)
     if ((x1-x2) == 0) and ((y1-y2) == 0):  # zero length line
         x_new, y_new = x1, y1
@@ -24,11 +25,7 @@ def shift_point(c1, c2, offset):
 
 def extend_line(line, offset, side='both'):
     """extend line in same orientation"""
-    if side == 'both':
-        sides = ['start', 'end']
-    else:
-        sides = [side]
-
+    sides = ['start', 'end'] if side == 'both' else [side]
     for side in sides:
         coords = line.coords
         if side == 'start':
@@ -41,6 +38,7 @@ def extend_line(line, offset, side='both'):
     return line
 
 def interseccion(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
+    # sourcery skip: low-code-quality
     ids = []
     tree_idx_pnt = rtree.index.Index()
     ipnt = 0
@@ -51,7 +49,7 @@ def interseccion(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
         for i, bbox in enumerate(lines_bbox):
             tree_idx.insert(i, bbox)
 
-    
+
     # create multilinestring of close-by lines
     for i1, l1 in zip(ids1,lines1):
         l1 = l1[0]
@@ -59,11 +57,10 @@ def interseccion(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
             # find close-by lines based on bounds with spatial index
             hits = list(tree_idx.intersection(lines_bbox[i1]))
             lines_hit = MultiLineString([lines1[i] for i in hits if i != i1])
+        elif isinstance(lines2,MultiLineString):
+            lines_hit = MultiLineString(lines2)
         else:
-            if isinstance(lines2,MultiLineString):
-                lines_hit = MultiLineString(lines2)
-            else:
-                lines_hit = [lines2]
+            lines_hit = [lines2]
 
         if tolerance > 0:
             l1 = extend_line(l1, tolerance)
@@ -71,32 +68,27 @@ def interseccion(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
         x = l1.intersection(lines_hit)
         try: x.is_empty 
         except Exception as e: x=x[0]
-            
+
         if not x.is_empty:
             if isinstance(x, Point):
                 pnts = [x]
+            elif isinstance(x, MultiPoint):
+                pnts = [Point(geom) for geom in x.__geo_interface__["coordinates"]]
+            elif isinstance(x, (MultiLineString, MultiPolygon, GeometryCollection)):
+                try:
+                    pnts = [Point(coords) for geom in x for coords in geom.coords]
+                except Exception as e:
+                    print(i1,e)
+                    print(x)
+            elif isinstance(x, (LineString, Polygon)):
+                pnts = [Point(coords) for coords in x.coords]
             else:
-                if isinstance(x, MultiPoint):
-                    pnts = [Point(geom) for geom in x.__geo_interface__["coordinates"]]
-                elif isinstance(x, (MultiLineString, MultiPolygon, GeometryCollection)):
-                    try:
-                        pnts = [Point(coords) for geom in x for coords in geom.coords]
-                    except Exception as e:
-                        print(i1,e)
-                        print(x)
-                elif isinstance(x, (LineString, Polygon)):
-                    pnts = [Point(coords) for coords in x.coords]
-                else:
-                    raise NotImplementedError('intersection yields bad type')
+                raise NotImplementedError('intersection yields bad type')
 
             for pnt in pnts:
                 if min_spacing > 0:
-                    if ipnt > 0:
-                        hits = list(tree_idx_pnt.intersection(pnt.bounds))
-                    else:
-                        hits = []
-
-                    if len(hits) == 0:  # no pnts within spacing
+                    hits = list(tree_idx_pnt.intersection(pnt.bounds)) if ipnt > 0 else []
+                    if not hits:  # no pnts within spacing
                         ipnt += 1
                         tree_idx_pnt.insert(ipnt, pnt.buffer(min_spacing).bounds)
                         #points.append(pnt)
@@ -104,33 +96,22 @@ def interseccion(ids1, lines1, lines2=None, tolerance=0., min_spacing=0):
                 else:
                     #points.append(pnt)
                     ids.append(i1)
-        
+
 
     return ids
 
 def fechaHora():
-  import datetime as dt
-  t = dt.datetime.today()
-  return str(t)[:-7].replace(" ","-").replace(":","")
+    import datetime as dt
+    t = dt.datetime.today()
+    return str(t)[:-7].replace(" ","-").replace(":","")
 
 def imp(text):
-  import datetime as dt
-  t = dt.datetime.today()
-  print("|%s|  %s" % (str(t)[5:-5],str(text)))
+    import datetime as dt
+    t = dt.datetime.today()
+    print(f"|{str(t)[5:-5]}|  {str(text)}")
 
 def dist2pnts(x1, y1, x2, y2):
 	return ((x2-x1)**2+(y2-y1)**2)**0.5
-
-
-
-
-
-
-
-
-
-
-
 
 def getPend(p1,p2):
 	try:
@@ -170,55 +151,57 @@ def unir(_linCen,_j):
 	return False		
 
 def avance(x):
-	v=''
-	a=open("avance.aux","+r")
-	while v=='':
-		v = a.read()
-		a.seek(0)
-	porc = float(v)+x
-	a.write(str(porc))
-	a.truncate(5)
-	a.close()
-	return porc
+    v=''
+    with open("avance.aux","+r") as a:
+        while not v:
+            v = a.read()
+            a.seek(0)
+        porc = float(v)+x
+        a.write(str(porc))
+        a.truncate(5)
+    return porc
 
 def getCampo(_cam):
-	a=open("avance.json","r")
-	_obj = json.loads(a.read())
-	a.close()
-	return _obj[_cam]
+    with open("avance.json","r") as a:
+        _obj = json.loads(a.read())
+    return _obj[_cam]
 
 def textFile(_arch,_modo,_dato=None):
-	a = open(_arch,_modo) 
-	r = a.write(_dato) if _modo in ["+a","w"] else a.read()
-	a.close()
-	return r
+    with open(_arch,_modo) as a:
+        r = a.write(_dato) if _modo in ["+a","w"] else a.read()
+    return r
 
 def putAtention(id):
-	a = open("control.json","r")
-	o = json.loads(a.read())
-	a.close()
-	tiempo = None
-	if o.get(id).get("local") is None:
-		o[id]={"time":t(),"local":[str(list(lc())[3:6]).replace(",",":")[1:-1]]}
-		tiempo = o.get(id).get("local")[0]
-	else:
-		tiempo = t() - o.pop(id).get("time")
-		#o[id]["local"].append(str(list(lc())[3:6]).replace(",",":")[1:-1])
-	a = open("control.json","w")
-	a.write(json.dumps(o,indent=4))
-	a.close()
-	return tiempo
+    with open("control.json","r") as a:
+        o = json.loads(a.read())
+    tiempo = None
+    if o.get(id).get("local") is None:
+        o[id]={"time":t(),"local":[str(list(lc())[3:6]).replace(",",":")[1:-1]]}
+        tiempo = o.get(id).get("local")[0]
+    else:
+        tiempo = t() - o.pop(id).get("time")
+        #o[id]["local"].append(str(list(lc())[3:6]).replace(",",":")[1:-1])
+    with open("control.json","w") as a:
+        a.write(json.dumps(o,indent=4))
+    return tiempo
 	
 def separar(_datos,_rutas,uC,sC,_aG,aa,pt):
     def outLine(_ar):
-        return (False if _ar['y'][0] < _ar['y'][1] < _ar['y'][2] or _ar['y'][0] >_ar['y'][1] > _ar['y'][2]  else True )  if _ar['x'][0] == _ar['x'][1] == _ar['x'][2] else (False if _ar['x'][0] < _ar['x'][1] < _ar['x'][2] or _ar['x'][0] > _ar['x'][1] > _ar['x'][2] else True)
+        return (
+            not _ar['y'][0] < _ar['y'][1] < _ar['y'][2]
+            and not _ar['y'][0] > _ar['y'][1] > _ar['y'][2]
+            if _ar['x'][0] == _ar['x'][1] == _ar['x'][2]
+            else not _ar['x'][0] < _ar['x'][1] < _ar['x'][2]
+            and not _ar['x'][0] > _ar['x'][1] > _ar['x'][2]
+        )
+
     bloques, ban =[],False
     with uC("tmp/resultado",["id_tmp","SHAPE@"]) as res:
         for row in res:
             _pol = _datos['geomEnt'][row[0]]['coord']
-            _lin = [{"id":n[0],"_coo": n[1].__geo_interface__['coordinates'][0],"nP":n[2]} for n in sC("tmp/%s" %_rutas['_nom_l'],["OID@","SHAPE@","numPol"],where_clause="numPol = %d" % row[0])]
+            _lin = [{"id":n[0],"_coo": n[1].__geo_interface__['coordinates'][0],"nP":n[2]} for n in sC(f"tmp/{_rutas['_nom_l']}",["OID@","SHAPE@","numPol"],where_clause=f"numPol = {row[0]}")]
             aMover={"ori":[],"nuevo":[]}
-            if len(_lin)>0:	
+            if _lin:	
                 for l in _lin:
                     x1,y1 = l['_coo'][0][0],l['_coo'][0][1]
                     x2,y2 = l['_coo'][1][0],l['_coo'][1][1]
@@ -226,8 +209,6 @@ def separar(_datos,_rutas,uC,sC,_aG,aa,pt):
                     v1,v2 = x2-x1,y2-y1
                     xmas= xd+ _datos['distancia']
                     ymas = ((v2*xmas) -(v2*x1)+(v1*y1))/v1
-                    #xmen= xd-_s.getDist()
-                    #ymen = ((v2*xmen) -(v2*x1)+(v1*y1))/v1
                     dist = ((xd-xmas)**2+(yd-ymas)**2)**0.5
                     _obj={ }
                     prop=dist/(_datos['distancia']/2)
@@ -235,8 +216,8 @@ def separar(_datos,_rutas,uC,sC,_aG,aa,pt):
                     _pos = [ xd+dis1[1] , yd-dis1[0]]
                     _obj["x"],_obj["y"]=[x1,_pos[0],x2],[y1,_pos[1],y2]
                     _pos =_pos if outLine(_obj) else [ xd-dis1[1] , yd+dis1[0]]
-                    aMover["ori"].append(tuple([xd,yd]))
-                    aMover["nuevo"].append(tuple(_pos))	
+                    aMover["ori"].append((xd, yd))
+                    aMover["nuevo"].append(tuple(_pos))
                 for i in range(len(_pol)):
                     if _pol[i] in aMover["ori"]:
                         index =  aMover["ori"].index(_pol[i])
@@ -244,30 +225,24 @@ def separar(_datos,_rutas,uC,sC,_aG,aa,pt):
                         if not ban:
                             bloques.append({"ini":i,"fin":None})
                             ban=True
-                        else:
-                            pass
                     elif ban:
                         bloques[-1]["fin"]=i-1
                         ban=False
-                if len(bloques)>0:
-                    if bloques[-1]["fin"] == None:
+                if bloques:
+                    if bloques[-1]["fin"] is None:
                         bloques.pop()
                     bloques.reverse()
                     for b in bloques:
                         for i in range(b["fin"]+_datos['vtx'],b["fin"],-1):
-                            try:
+                            with contextlib.suppress(Exception):
                                 _pol.pop(i)
-                            except Exception as e:
-                                pass
                         for i in range(b["ini"]-1,b["ini"]-_datos['vtx']-1,-1):
-                            try:
+                            with contextlib.suppress(Exception):
                                 _pol.pop(i)
-                            except Exception as e:
-                                pass
                 try:
                     _g_=aa([pt(*p) for p in _pol])
                     row[1]= _aG("polygon",_g_)
                     res.updateRow(row)
-                except:
+                except Exception:
                     print(_pol)
     return  len(bloques)

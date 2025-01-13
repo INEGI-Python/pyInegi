@@ -7,7 +7,8 @@ from multiprocessing import Pool, freeze_support
 import json
 import argparse
 from shapely import LineString
-from pyInegi.shapely_tools3 import intersection_points
+from shapely.geometry import MultiLineString
+from ..basico.funciones import interseccion
 import matplotlib.pyplot as plt
 
 
@@ -44,14 +45,14 @@ def enParalelo(polOrig):
 	sept = list(union.geoms) 
 	DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
 	DFclip.set_index('id',inplace=True)
-	b = intersection_points(DFclip.index,DFclip.values,borde,1)
+	b = interseccion(DFclip.index,DFclip.values,borde,1)
 	centrales = DFclip.drop(index=b)
 	union = centrales.union_all()
 	u = geopandas.GeoSeries([union])
 	unir = u.line_merge()
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
-	reg_pol = f"[{pols['cont']} de  {pols['total']}]  PID: {os.getpid()} --  ID Pol: {idPol}"+" -- "+"Tiempo: %.3f seg. \n" % float(t()-ini)
+	reg_pol = f"[{pols['cont']} de  {pols['total']}]  PID: {os.getpid()} --  ID Pol: {idPol} -- Tiempo: {float(t()-ini).__round__(3)} seg. \n"
 	pols['cont'] += registrar("registros.log",reg_pol,pols)
 	return _geoms.values
 
