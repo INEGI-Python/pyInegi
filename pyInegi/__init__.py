@@ -1,6 +1,10 @@
+from modulefinder import packagePathMap
+
+from win32com import gen_py
 from .basico import funciones,polyskel,shapely_tools
 from .generalizacion import lineaCentral,reducePuntos,webMap
-#import webbrowser
+import webbrowser
+from  packaging import p
 __version__="1.0.0"
 __ALL__ = ["generalizacion","ayuda","descripcion","reducePuntos","lineaCentral","webMap","basico"]
 
@@ -22,3 +26,9 @@ N©-copyright  INEGI.2025 """
 def ayuda(**_dat):
 	#webbrowser.open_new("https://github.com/INEGI-Python/pyInegi/tree/main")
 	print(descripcion(_dat))
+	
+
+	print(gen_py())
+	
+	
+
