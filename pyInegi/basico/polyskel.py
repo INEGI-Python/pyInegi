@@ -408,7 +408,7 @@ class _EventQueue:
 
 	
 def skeletonize(polygon,id=0,holes=[]):
-	from .basico import  data as d
+	from . import  data as d
 	slav = _SLAV(polygon, holes)
 	output = {"lin":[],"cen":[]}
 	prioque = _EventQueue()

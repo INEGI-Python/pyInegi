@@ -49,7 +49,7 @@ def crearMapa(**capas):
 	m2.show_in_browser()
 
 
-def inicio_rp(**params):
+def ReducePuntos(**params):
 	imp(params)
 	gdb = params['gdb']
 	feat = params['feat']
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 		import fiona
 		print(eval(args.FEAT))
 	else:
-		inicio_rp(args)
+		ReducePuntos(args)
 		#inicio_rp(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP.split(","),dist=args.DIST,ver=args.VER)
 #else:
 #   main(gdb='datos/prueba2.shp', feat='_', camp="Jerarquia:1,geografico:1,num_hab:0".split(","),dist=1500,ver=1) 

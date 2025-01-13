@@ -1,10 +1,21 @@
-
+import os
 import contextlib
 from folium import Polygon
 import rtree,json
 from shapely import GeometryCollection, LineString, MultiLineString, MultiPoint, MultiPolygon, Point
 import numpy as np
 from time import time as t,localtime as lc
+
+
+
+def renombrar(name):
+	noms = name.split(".")
+	if not os.path.exists(name): 
+		return name
+	newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
+	nomComp = f"{newName}.{noms[1]}"
+	return renombrar(nomComp)
+
 
 def shift_point(c1, c2, offset):
     """

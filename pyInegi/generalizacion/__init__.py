@@ -1,8 +1,8 @@
-from .lineaCentral import inicio as lineaCentral
-from .reducePuntos import inicio_rp as  reducePuntos
+from .lineaCentral import LineaCentral
+from .reducePuntos import ReducePuntos
 #from .separaLineas import inicio as separaLineas
-from .webMap import inicio as webMap
-from .quitaVertices import inicio_gpd as quitarVertices
+from .webMap import WebMAP
+from .quitaVertices import QuitaVertices
 
 
 

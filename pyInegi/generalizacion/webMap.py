@@ -3,7 +3,7 @@ import numpy as np
 import folium as fol
 import geopandas as gpd
 
-def inicio(**param): 
+def WebMAP(**param): 
 	capas = [None]
 	for i in range(len(param['datos'])):
 		tmp = gpd.read_file(param["datos"][i])
@@ -33,9 +33,10 @@ if __name__ == "__main__":
 		print("[ERROR] La cantidad de propiedades no coincide con la cantidad de datos")
 		exit()
 	if len(names)==1 and  len(names)!=len(datos):
-		inicio(datos=datos,tipos=tipos,names=names*len(datos),color=color)
+	
+		WebMAP(datos=datos,tipos=tipos,names=names*len(datos),color=color)
 	else:
-		inicio(datos=datos,tipos=tipos,names=names,color=color)
+		WebMAP(datos=datos,tipos=tipos,names=names,color=color)
 	
 
 

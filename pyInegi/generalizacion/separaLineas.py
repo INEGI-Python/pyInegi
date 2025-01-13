@@ -8,7 +8,7 @@ from arcpy import SpatialReference as sPt, Point as pt, Geometry as _aG, Array a
 from multiprocessing import cpu_count,Pool
 import argparse 
 from ..funciones____ import  *
-from ..polyskel import skeletonize
+from ..basico.polyskel import skeletonize
 
 
 def memory_usage_psutil():

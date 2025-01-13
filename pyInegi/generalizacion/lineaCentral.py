@@ -8,7 +8,7 @@ import json
 import argparse
 from shapely import LineString
 from shapely.geometry import MultiLineString
-from ..basico.funciones import interseccion
+from ..basico.funciones import interseccion,renombrar
 import matplotlib.pyplot as plt
 
 
@@ -21,17 +21,11 @@ def registrar(name,registro,pols={'cont':-1}):
 			print(f"[{pols['cont']}]")
 		return 1
 
-def renombrar(name):
-	noms = name.split(".")
-	if not os.path.exists(name): 
-		return name
-	newName = (noms[0][:-1] + str(int(noms[0][-1]) + 1) if noms[0][-1].isdigit() else f"{noms[0]}_1")
-	nomComp = f"{newName}.{noms[1]}"
-	return renombrar(nomComp)
+
 
 
 def enParalelo(polOrig):
-	from variables import parametros as p, CRS, Poligonos as pols
+	from pyInegi.auxiliar.variables import parametros as p, CRS, Poligonos as pols
 	ini=t()
 	idPol = polOrig[0]
 	geomOrig = polOrig[1]["geometry"]
@@ -57,7 +51,7 @@ def enParalelo(polOrig):
 	return _geoms.values
 
 
-def inicio(**a):
+def LineaCentral(**a):
 	log = open("registros.log","w")
 	log.close()
 	print(" OBTENIENDO LINEAS CENTRALES.... ")
@@ -108,7 +102,7 @@ if __name__ == "__main__":
 	args.add_argument("web",type=int,nargs="?",default=0,help="Muestra el resultado en un sistema de información geográfica Web. DEFAULT 0 (Falso, No)")
 	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
 	args = args.parse_args()
-	inicio(args)        
+	LineaCentral(args)        
 
         
 # import pyInegi
