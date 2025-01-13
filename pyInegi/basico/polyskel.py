@@ -34,7 +34,7 @@ def _cross(a, b):
 
 
 def _approximately_equals(a, b):
-	from parametros import data as d
+	from basico import data as d
 	return a == b or (abs(a - b) <= max(abs(a), abs(b)) * d['APROX'])
 
 

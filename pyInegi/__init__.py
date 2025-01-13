@@ -1,4 +1,4 @@
-from .basico import funciones
+from .basico import funciones,polyskel,shapely_tools
 from .generalizacion import lineaCentral,reducePuntos,webMap
 #import webbrowser
 __version__="1.0.0"
@@ -15,7 +15,7 @@ def descripcion(_dat):
 	_dat['a'] ="""pyInegi es una libreria de código abierto para PYTHON desarrollada por el Instituto Nacional 
 de Estadísitica y Geografía. INEGI. La cual cuadyuba a los ciudadanos mexicanos asi como al resto del mundo y 
 sus alrededores, desde el cinturon de asteroides y hasta el cinturon de Kuiper, desde la nube de Oort y hasta los
-confines de la via lactea,
+confines de la via lactea, desde la galxia de Andromeda
 N©-copyright  INEGI.2025 """
 	return formato(*list(_dat.values()))
 
