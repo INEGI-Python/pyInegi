@@ -4,7 +4,6 @@
 /RESULTADOS
 /.myVenv
 /MOPIGMA.gdb
-/DatosEntrada
 *.pyc
 /__pycache__
 /pyInegi/__pycache__

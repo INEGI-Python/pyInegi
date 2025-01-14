@@ -103,7 +103,7 @@ class _LAVertex:
 		return self.lav._slav._original_edges
 
 	def next_event(self):
-		from parametros import data as d
+		from __init__ import data as d
 		events = []
 		if self.is_reflex:
 			for edge in self.original_edges:
@@ -215,7 +215,7 @@ class _SLAV:
 		return (Subtree(event.intersection_point, event.distance, sinks), events)
 
 	def handle_split_event(self, event, _id):
-		from parametros import data as d
+		from __init__ import data as d
 		lav = event.vertex.lav
 
 		sinks = [event.vertex.point]

@@ -12,7 +12,6 @@ def QuitaVertices(**param):
 	gdf1 = geo.read_file(param['shp1']) if param.get('gdb1') is None else  geo.read_file(param['gdb1'],layer=param['feat1'])
 	gdf2 = geo.read_file(param['shp2']) if param.get('gdb2') is None else  geo.read_file(param['gdb2'],layer=param['feat2'])
 	CRS = gdf1.crs.to_string()
-	# Obtener los vértices que se intersectan
 	vertices_gdf1 = gdf1.exterior.apply(lambda x: list(x.coords))
 	vertices_gdf2 = gdf2.geometry.apply(lambda x: (x.x, x.y)).tolist()
 	vtx_new = []
