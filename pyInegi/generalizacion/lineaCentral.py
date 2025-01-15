@@ -30,6 +30,7 @@ def enParalelo(polOrig):
 	idPol = polOrig[0]
 	geomOrig = polOrig[1]["geometry"]
 	geomOrig = geomOrig.buffer(0)
+	bufferNegativo = geomOrig.buffer(p['dist']*-1).boundary    
 	segm = geomOrig.segmentize(p['dist'])
 	df_segm = geopandas.GeoDataFrame(geometry=[segm],crs=CRS)
 	voroPoly = df_segm.voronoi_polygons()
@@ -48,7 +49,7 @@ def enParalelo(polOrig):
 	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
 	reg_pol = f"[{pols['cont']} de  {pols['total']}]  PID: {os.getpid()} --  ID Pol: {idPol} -- Tiempo: {float(t()-ini).__round__(3)} seg. \n"
 	pols['cont'] += registrar("registros.log",reg_pol,pols)
-	return _geoms.values
+	return [_geoms.values,bufferNegativo._geom]
 
 
 def LineaCentral(**a):
@@ -61,24 +62,29 @@ def LineaCentral(**a):
 	orig =  geopandas.read_file(a["file"],rows=None if a["rows"]==-1 else a["rows"], columns=["geometry"])
 	indice=orig.sindex
 	CRS = orig.crs.to_string()
-	with open("variables.py", "w") as _var:
+	ruta=os.getcwd()
+	with open(f"{ruta}/pyInegi/auxiliar/variables.py", "w") as _var:
 		_var.write(f"parametros = {json.dumps(a)} \n")
 		_var.write(f"CRS='{CRS}'\n")
 		p = {'total':orig.index.stop,'cont':1}
 		_var.write(f"Poligonos = {p}")
 		_var.close() 
-	_ge=[]
+	_ge,_buff=[],[]
 	with Pool(a["cpu"]) as pool:
 		temp = pool.map(enParalelo,orig.iterrows())
 		for tt in temp:
-			_ge+=tt
+			_ge+=tt[0]
+			_buff+=tt[1]
 		arr = np.asarray(_ge)
 		voroDF = geopandas.GeoDataFrame(geometry=arr,crs=CRS)
+		arr2 = np.asarray(_buff)
+		buff_DF = geopandas.GeoDataFrame(geometry=arr2,crs=CRS)
 		bordeTot = orig.boundary
 		if not os.path.exists("DatosSalida"):
 			os.mkdir("DatosSalida")
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
 		result = renombrar("DatosSalida/lineaCentral.shp") 
+		buff_DF.to_file("DatosSalida/buffer_-2m.shp")
 		voroDF.to_file(result)
 	time_tot = "TIEMPO TOTAL: %.3f " % float(t()-t1)
 	print(time_tot)

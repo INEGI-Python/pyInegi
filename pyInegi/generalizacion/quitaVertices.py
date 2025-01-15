@@ -12,14 +12,18 @@ def QuitaVertices(**param):
 	gdf1 = geo.read_file(param['shp1']) if param.get('gdb1') is None else  geo.read_file(param['gdb1'],layer=param['feat1'])
 	gdf2 = geo.read_file(param['shp2']) if param.get('gdb2') is None else  geo.read_file(param['gdb2'],layer=param['feat2'])
 	CRS = gdf1.crs.to_string()
-	vertices_gdf1 = gdf1.exterior.apply(lambda x: list(x.coords))
+	vtx_polys = [i[1].geometry for  i in gdf1.iterrows()]
+	#vtx_polys = gdf1.boundary.to_xarray()
 	vertices_gdf2 = gdf2.geometry.apply(lambda x: (x.x, x.y)).tolist()
+	print(vtx_polys)
+	print(vertices_gdf2)
+
 	vtx_new = []
-	for poly_vertices in vertices_gdf1:
-		for vertice in poly_vertices:
+	for poly_vertices in vtx_polys: 
+		for vertice in poly_vertices._geom:
 			if vertice not in vertices_gdf2:
 				vtx_new.append(np.asarray(vertice))
-	new_pol = geo.GeoDataFrame(geometry=[Polygon(vtx_new)],crs=CRS)
+	new_pol = geo.GeoDataFrame(geometry=[Polygon(vtx_new)],crs=CRS)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 	new_nom = renombrar("DatosSalida/resQuitaVtx.shp")
 	new_pol.to_file(new_nom)
 	print(f"El o los objetos resultantes se encuentran en --> {getcwd()}/{new_nom}")
@@ -36,6 +40,6 @@ if __name__ == "__main__":
 	parser.add_argument('gdb2', type=str, nargs='?', default=None, help='GeodataBase donde  se encuentran los datos a eliminar')
 	parser.add_argument('feat2', type=str, nargs='?', default=None, help='FeatureClass de Puntos a eliminar')
 
-	a = parser.parse_args()
+	a = parser.parse_args() 
 	
-	QuitaVertices(gdb1=a.gdb1,feat1=a.feat1,shp1=a.shp1,gdb2=a.gdb2,feat2=a.feat2,shp2=a.shp2)
+	QuitaVertices(gdb1=a.gdb1,feat1=a.feat1,shp1=a.shp1,gdb2=a.gdb2,feat2=a.feat2,shp2=a.shp2) 
