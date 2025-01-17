@@ -29,13 +29,11 @@ def enParalelo(polOrig):
 	ini=t()
 	idPol = polOrig[0]
 	geomOrig = polOrig[1]["geometry"]
-	geomOrig = geomOrig.buffer(0)
-	#bufferNegativo = geomOrig.buffer(p['dist']*-0.51).boundary    
+	geomOrig = geomOrig.buffer(0)  
 	segm = geomOrig.segmentize(p['dist'])
 	df_segm = geopandas.GeoDataFrame(geometry=[segm],crs=CRS)
 	voroPoly = df_segm.voronoi_polygons()
-	#borde = segm.boundary
-	borde = segm.buffer(p['dist']*-10).boundary
+	borde = segm.buffer(p['dist']*-1).boundary
 	DFclip=voroPoly.boundary.clip(geomOrig)
 	union = DFclip.union_all()
 	sept = list(union.geoms) 
@@ -43,8 +41,6 @@ def enParalelo(polOrig):
 	DFclip.set_index('id',inplace=True)
 	b = interseccion(DFclip.index,DFclip.values,borde,0.1,0.0)
 	centrales = DFclip.drop(index=b)
-	#b2 = interseccion(centrales.index,centrales.values,borde2,1,0.0)
-	#centrales2 = centrales.drop(index=b2)
 	union = centrales.union_all()
 	u = geopandas.GeoSeries([union])
 	unir = u.line_merge()
