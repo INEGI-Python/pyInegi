@@ -12,18 +12,19 @@ def QuitaVertices(**param):
 	gdf1 = geo.read_file(param['shp1']) if param.get('gdb1') is None else  geo.read_file(param['gdb1'],layer=param['feat1'])
 	gdf2 = geo.read_file(param['shp2']) if param.get('gdb2') is None else  geo.read_file(param['gdb2'],layer=param['feat2'])
 	CRS = gdf1.crs.to_string()
-	vtx_polys = [i[1].geometry for  i in gdf1.iterrows()]
-	#vtx_polys = gdf1.boundary.to_xarray()
+	vertices_gdf1 = gdf1.boundary    #.exterior.apply(lambda x: list(x.coords))
 	vertices_gdf2 = gdf2.geometry.apply(lambda x: (x.x, x.y)).tolist()
 	print(vtx_polys)
 	print(vertices_gdf2)
 
 	vtx_new = []
-	for poly_vertices in vtx_polys: 
-		for vertice in poly_vertices._geom:
-			if vertice not in vertices_gdf2:
-				vtx_new.append(np.asarray(vertice))
-	new_pol = geo.GeoDataFrame(geometry=[Polygon(vtx_new)],crs=CRS)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+	for vertice in vertices_gdf2:
+		print(vertice)
+		vtx_new.extend(
+			np.asarray(vertice)
+			if vertice not in vertices_gdf1
+			else None		)
+	new_pol = geo.GeoDataFrame(geometry=[Polygon(vtx_new)],crs=CRS)
 	new_nom = renombrar("DatosSalida/resQuitaVtx.shp")
 	new_pol.to_file(new_nom)
 	print(f"El o los objetos resultantes se encuentran en --> {getcwd()}/{new_nom}")

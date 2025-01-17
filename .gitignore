@@ -1,4 +1,5 @@
 /DatosSalida
+/DatosEntrada
 /datos
 /pyInegi/datos
 /RESULTADOS
@@ -7,3 +8,4 @@
 *.pyc
 /__pycache__
 /pyInegi/__pycache__
+*.log
