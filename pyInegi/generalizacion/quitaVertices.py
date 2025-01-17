@@ -14,7 +14,7 @@ def QuitaVertices(**param):
 	CRS = gdf1.crs.to_string()
 	vertices_gdf1 = gdf1.boundary    #.exterior.apply(lambda x: list(x.coords))
 	vertices_gdf2 = gdf2.geometry.apply(lambda x: (x.x, x.y)).tolist()
-	print(vtx_polys)
+	print(vertices_gdf1)
 	print(vertices_gdf2)
 
 	vtx_new = []
