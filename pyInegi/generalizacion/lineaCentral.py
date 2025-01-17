@@ -7,7 +7,7 @@ from multiprocessing import Pool, freeze_support
 import json
 import argparse
 from shapely import LineString
-from shapely.geometry import MultiLineString
+from shapely.geometry import GeometryCollection,MultiLineString
 from ..basico.funciones import interseccion,renombrar
 import matplotlib.pyplot as plt
 
@@ -17,8 +17,8 @@ def registrar(name,registro,pols={'cont':-1}):
 	with open(name,"+a") as reg:
 		reg.write(f"{registro}")
 		reg.close()
-		if pols['cont'] % int(pols['total']/10) == 0:
-			print(f"[{pols['cont']}]")
+		#if pols['cont'] % int(pols['total']/10) == 0:
+			#print(f"[{pols['cont']}]")
 		return 1
 
 
@@ -30,26 +30,29 @@ def enParalelo(polOrig):
 	idPol = polOrig[0]
 	geomOrig = polOrig[1]["geometry"]
 	geomOrig = geomOrig.buffer(0)
-	bufferNegativo = geomOrig.buffer(p['dist']*-1).boundary    
+	#bufferNegativo = geomOrig.buffer(p['dist']*-0.51).boundary    
 	segm = geomOrig.segmentize(p['dist'])
 	df_segm = geopandas.GeoDataFrame(geometry=[segm],crs=CRS)
 	voroPoly = df_segm.voronoi_polygons()
-	borde = segm.boundary
+	#borde = segm.boundary
+	borde = segm.buffer(p['dist']*-10).boundary
 	DFclip=voroPoly.boundary.clip(geomOrig)
 	union = DFclip.union_all()
 	sept = list(union.geoms) 
 	DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
 	DFclip.set_index('id',inplace=True)
-	b = interseccion(DFclip.index,DFclip.values,borde,1)
+	b = interseccion(DFclip.index,DFclip.values,borde,0.1,0.0)
 	centrales = DFclip.drop(index=b)
+	#b2 = interseccion(centrales.index,centrales.values,borde2,1,0.0)
+	#centrales2 = centrales.drop(index=b2)
 	union = centrales.union_all()
 	u = geopandas.GeoSeries([union])
 	unir = u.line_merge()
 	tempo = geopandas.GeoDataFrame(geometry=unir,crs=CRS)
-	_geoms = tempo.simplify(tolerance=p['dist']*0.51)
+	_geoms = tempo.simplify(tolerance=p['dist']*1.01)
 	reg_pol = f"[{pols['cont']} de  {pols['total']}]  PID: {os.getpid()} --  ID Pol: {idPol} -- Tiempo: {float(t()-ini).__round__(3)} seg. \n"
 	pols['cont'] += registrar("registros.log",reg_pol,pols)
-	return [_geoms.values,bufferNegativo._geom]
+	return _geoms.values
 
 
 def LineaCentral(**a):
@@ -69,22 +72,19 @@ def LineaCentral(**a):
 		p = {'total':orig.index.stop,'cont':1}
 		_var.write(f"Poligonos = {p}")
 		_var.close() 
-	_ge,_buff=[],[]
+	_linCen = []
 	with Pool(a["cpu"]) as pool:
 		temp = pool.map(enParalelo,orig.iterrows())
 		for tt in temp:
-			_ge+=tt[0]
-			_buff+=tt[1]
-		arr = np.asarray(_ge)
+			_linCen+=tt
+		arr = np.asarray(_linCen)
 		voroDF = geopandas.GeoDataFrame(geometry=arr,crs=CRS)
-		arr2 = np.asarray(_buff)
-		buff_DF = geopandas.GeoDataFrame(geometry=arr2,crs=CRS)
-		bordeTot = orig.boundary
+		bordeTot = orig.buffer(a["dist"]*-2).boundary
 		if not os.path.exists("DatosSalida"):
 			os.mkdir("DatosSalida")
 		bordeTot.to_file(renombrar("DatosSalida/borde.shp"))	
-		result = renombrar("DatosSalida/lineaCentral.shp") 
-		buff_DF.to_file("DatosSalida/buffer_-2m.shp")
+		result = renombrar(f"DatosSalida/lineaCentral_{a['dist']}m.shp") 
+		#buff_DF.to_file("DatosSalida/buffer_-2m.shp")
 		voroDF.to_file(result)
 	time_tot = "TIEMPO TOTAL: %.3f " % float(t()-t1)
 	print(time_tot)
@@ -97,7 +97,6 @@ def LineaCentral(**a):
 		m1.show_in_browser()
 	return os.getcwd().replace("\\","/")+result
     
-
 
 if __name__ == "__main__":
 	freeze_support()
