@@ -6,7 +6,7 @@ import numpy as np
 from multiprocessing import Pool, freeze_support
 import json
 import argparse
-from shapely import LineString
+from shapely import LineString,voronoi_polygons,Polygon
 from shapely.geometry import GeometryCollection,MultiLineString
 from ..basico.funciones import interseccion,renombrar
 import matplotlib.pyplot as plt
@@ -32,6 +32,7 @@ def enParalelo(polOrig):
 	geomOrig = geomOrig.buffer(0)  
 	segm = geomOrig.segmentize(p['dist'])
 	df_segm = geopandas.GeoDataFrame(geometry=[segm],crs=CRS)
+	#print(dir(df_segm.geometry))
 	voroPoly = df_segm.voronoi_polygons()
 	borde = segm.buffer(p['dist']*-1).boundary
 	DFclip=voroPoly.boundary.clip(geomOrig)
@@ -40,7 +41,12 @@ def enParalelo(polOrig):
 	DFclip=geopandas.GeoDataFrame(data=[{"id":i} for i in range(1,len(sept)+1)], geometry=sept)
 	DFclip.set_index('id',inplace=True)
 	b = interseccion(DFclip.index,DFclip.values,borde,0.1,0.0)
-	centrales = DFclip.drop(index=b)
+	#print(b)
+	#eliminados = DFclip.iloc[b]
+	#for e in  eliminados.iterrows():
+	#	print(e)
+
+	centrales = DFclip.drop(index=b)	
 	union = centrales.union_all()
 	u = geopandas.GeoSeries([union])
 	unir = u.line_merge()
@@ -59,7 +65,7 @@ def LineaCentral(**a):
 	print(f"\nCargando su archivo de datos, espere por favor....")
 	t1=t()
 	orig =  geopandas.read_file(a["file"],rows=None if a["rows"]==-1 else a["rows"], columns=["geometry"])
-	indice=orig.sindex
+	#indice=orig.sindex
 	CRS = orig.crs.to_string()
 	ruta=os.getcwd()
 	with open(f"{ruta}/pyInegi/auxiliar/variables.py", "w") as _var:
@@ -95,7 +101,6 @@ def LineaCentral(**a):
     
 
 if __name__ == "__main__":
-	freeze_support()
 	args = argparse.ArgumentParser(description="Regresa  las líneas centrales de cualquier polígono en formato shape")
 	args.add_argument("file",type=str,help="Ruta de la capa de polígonos")
 	args.add_argument("dist",type=int,nargs="?",default=10,help="Longitud máxima de las líneas al segmentar los polígonos. DEFAULT 10 m")

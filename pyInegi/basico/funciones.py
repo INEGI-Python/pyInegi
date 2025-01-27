@@ -140,10 +140,7 @@ def _angles_(a, inside, in_deg):
 	dt = np.einsum('ij,ij->i', ba, bc)	
 	ang = np.arctan2(cr, dt) 
 	TwoPI = np.pi * 2
-	if inside:
-		angles = np.where(ang < 0, ang + TwoPI, ang)
-	else:
-		angles = np.where(ang > 0, TwoPI - ang, ang)
+	angles = np.where(ang < 0, ang + TwoPI, ang) if inside else np.where(ang > 0, TwoPI - ang, ang)
 	if in_deg:
 		angles = np.degrees(angles)
 	return angles
