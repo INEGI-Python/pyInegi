@@ -9,11 +9,23 @@ from pyInegi.generalizacion import webMap
 from pyInegi.basico import funciones as func
 
 
+def chaikin_smooth(coords, refinements=5):
+    for _ in range(refinements):
+        new_coords = []
+        for i in range(len(coords) - 1):
+            p0 = coords[i]
+            p1 = coords[i + 1]
+            new_coords.append((0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1]))
+            new_coords.append((0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1]))
+        coords = new_coords
+    return coords
+
+
+
 
 def linea_central_distancia(puntos,pun):
     puntos = np.array(puntos)
     distancias = distance.cdist(puntos, np.array(pun[:1]))
-    print(distancias)
     distancias_minimas = np.zeros(len(puntos))
     for i in range(len(puntos)):
         distancias_minimas[i] = np.min(distancias[i])
@@ -60,10 +72,13 @@ for id,row in dat.iloc[10:15].iterrows():
     #v2 = voronoi_polygons(tmp)
     pntOrd = linea_central_distancia(vtx_in,puntos)
 
-    df = geo.GeoDataFrame(geometry=[LineString(pntOrd)], crs=CRS)
-    punt_df = geo.GeoDataFrame(data=[{"OID":i} for i in range(1,len(pntOrd)+1)],geometry=[Point(*p) for p  in pntOrd], crs=CRS)
-    unir = df.merge().
-    simpli = unir.simplify(tolerance=5)
+    df = geo.GeoSeries([LineString(chaikin_smooth(list(pntOrd[::-1]),15))])
+    punt_df = geo.GeoDataFrame(data=[{"OID":i} for i in range(1,len(pntOrd)+1)],geometry=[Point(*p) for p  in pntOrd[::-1]], crs=CRS)
+    
+    tempo = geo.GeoDataFrame(geometry=df,crs=CRS)
+    print(tempo)
+
+    simpli = tempo.simplify(tolerance=10)
     df.to_file("DatosSalida/LineaCentral.shp")
     simpli.to_file("DatosSalida/LineaCentral_Simplifficada.shp")
     punt_df.to_file("DatosSalida/PuntosOrdenados.shp")
