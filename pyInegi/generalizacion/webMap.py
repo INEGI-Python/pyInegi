@@ -1,15 +1,36 @@
 import argparse as ag
 import numpy as np
 import folium as fol
-import geopandas as gpd
+import geopandas as geo
+import webbrowser as wb
 
 def WebMAP(**param): 
 	capas = [None]
 	for i in range(len(param['datos'])):
-		tmp = gpd.read_file(param["datos"][i])
+		style=dict()
+		tmp = geo.read_file(param["datos"][i])
 		CRS = tmp.crs.to_string()
-		print(param["names"][i])
-		capas.append(tmp.explore(m=capas[-1] ,name=param["names"][i],tooltip=True,style_kwds=dict(color=param["color"][i],weight=5,opacity=1) ))
+		# Configrar los estilos según el tipo de geometría
+		if param["tipos"][i].upper() == "POINT":
+			style = dict(
+				radius=2,
+				color=param["color"][i],
+				weight=1,
+				opacity=1,
+				fillOpacity=0.7
+			)
+		else:  # Para LINESTRING, POLYGON, etc.
+			style = dict(
+				color=param["color"][i],
+				weight=3,
+				opacity=1
+			)	
+		capas.append(tmp.explore(
+			m=capas[-1],
+			name=param["names"][i],
+			tooltip=True,
+			style_kwds=style
+		))
 	fol.TileLayer("OpenStreetMap",show=True).add_to(capas[-1])
 	fol.LayerControl().add_to(capas[-1])
 	capas[-1].show_in_browser()

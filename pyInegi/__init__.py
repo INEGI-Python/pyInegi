@@ -1,6 +1,3 @@
-from modulefinder import packagePathMap
-
-from win32com import gen_py
 from .basico import funciones,polyskel,shapely_tools
 from .generalizacion import lineaCentral,reducePuntos,webMap
 import webbrowser

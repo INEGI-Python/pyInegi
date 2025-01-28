@@ -20,12 +20,22 @@ def chaikin_smooth(coords, refinements=5):
         coords = new_coords
     return coords
 
-
+def simplificarLinea(coords,dist):
+    coords = np.array(coords)
+    new_coords=[coords[0]]
+    for i in range(1,len(coords)-1):
+        b = coords[i]
+        a_b = func.dist2pnts(new_coords[-1][0],new_coords[-1][1],b[0],b[1])
+        if a_b>dist:
+            new_coords.append(b)
+    new_coords.append(coords[-1])
+    return new_coords
+    
 
 
 def linea_central_distancia(puntos,pun):
     puntos = np.array(puntos)
-    distancias = distance.cdist(puntos, np.array(pun[:1]))
+    distancias = distance.cdist(puntos, np.array([pun]))
     distancias_minimas = np.zeros(len(puntos))
     for i in range(len(puntos)):
         distancias_minimas[i] = np.min(distancias[i])
@@ -43,70 +53,57 @@ def shpTmp(gdf,nom):
     return nom
 
 
-dat = geo.read_file("DatosEntrada/costa-acapulco.shp",rows=100)
+dat = geo.read_file("DatosEntrada/SinIslas.shp",rows=300)
 CRS = dat.crs.to_string()
-print("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*  DIR(GEOM)  *-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*")
 datos,tipos,names,color=[],[],[],[]
-for id,row in dat.iloc[10:15].iterrows():
+layers = [[],[],[],[],[]]
+for id,row in dat.iterrows():
     geom = row.geometry
-    geom = geom.segmentize(5)
-    puntos=list(geom.exterior.coords)
-    for interior in geom.interiors:
+    segm = geom.buffer(0).segmentize(8)
+    puntos=list(segm.exterior.coords)
+    for interior in segm.interiors:
         puntos.extend(list(interior.coords))
     v1 = Voronoi(np.array(puntos))
-    v2 = geo.GeoDataFrame(geometry=[geom],crs=CRS)
-    print("*--*-*-*-*-**-*-*-*-***  v2  ***-*-*-*-*-*-*-*-**-*-*-")
-
-    v2v = v2.voronoi_polygons()
-    print("*--*-*-*-*-**-*-*-*-***  v2v   ***-*-*-*-*-*-*-*-**-*-*-")
-
+    #v2 = geo.GeoDataFrame(geometry=[geom],crs=CRS)
     vtx_in = [v for v in v1.vertices if Point(v).intersects(geom) ]
-    #v1_df = geo.GeoDataFrame(data=[{"id":id} for id in range(len(v1.vertices))],geometry=[Point(*v) for v in v1.vertices],crs=CRS)
     v1_df = geo.GeoDataFrame(data=[{"id":i} for i in range(1,len(vtx_in)+1)],geometry=[Point(*v) for  v in vtx_in],crs=CRS)
-    voro2 = Polygon(v1_df.geometry)
-    voro2_df = geo.GeoDataFrame(geometry=[voro2],crs=CRS)
-    voro_poly=voro2_df.voronoi_polygons()
-    voro_poly.to_file(func.renombrar("DatosSalida/voro2.shp"))
-    #v1_df.set_index("id")
-    #vv = geo.GeoDataFrame(geometry=[Point(*p) for p in vtx_in],crs=CRS)
-    #v2 = voronoi_polygons(tmp)
-    pntOrd = linea_central_distancia(vtx_in,puntos)
-
-    df = geo.GeoSeries([LineString(chaikin_smooth(list(pntOrd[::-1]),15))])
-    punt_df = geo.GeoDataFrame(data=[{"OID":i} for i in range(1,len(pntOrd)+1)],geometry=[Point(*p) for p  in pntOrd[::-1]], crs=CRS)
+   
     
-    tempo = geo.GeoDataFrame(geometry=df,crs=CRS)
-    print(tempo)
+    if len(vtx_in)>1:
+        pntOrd = linea_central_distancia(vtx_in,puntos[0])[::-1]
 
-    simpli = tempo.simplify(tolerance=10)
-    df.to_file("DatosSalida/LineaCentral.shp")
-    simpli.to_file("DatosSalida/LineaCentral_Simplifficada.shp")
-    punt_df.to_file("DatosSalida/PuntosOrdenados.shp")
-    print(f"*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* {id} *-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*")
+        df = geo.GeoSeries([LineString(pntOrd)],crs=CRS)
+        layers[0].append(LineString(pntOrd),)
+        punt_df = geo.GeoDataFrame(geometry=[Point(*p) for p  in pntOrd], crs=CRS)
+        [layers[3].append(Point(*p)) for p  in pntOrd]
+        simpli = geo.GeoDataFrame(geometry=[LineString(simplificarLinea(pntOrd,16))],crs=CRS)
+        #simpli = tempo.union_all().simplify(5)
+        layers[1].append(LineString(simpli.__geo_interface__['features'][0]['geometry']['coordinates']))
+        #smooth = geo.GeoSeries([LineString(chaikin_smooth(simpli.geometry[0].coords,5))],crs=CRS)
+        layers[2].append(LineString(chaikin_smooth(list(simpli.__geo_interface__['features'][0]['geometry']['coordinates']),5)))
+        layers[4].append(segm)
+        print(f"*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* {id} *-*--*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*")
+        
 
-    print(type(v1_df))
-    nom = f"DatosSalida/v1_.shp"
-    v1_df.to_file(nom)
+linCen = geo.GeoDataFrame(geometry=layers[0],crs=CRS)
+linSimpli = geo.GeoDataFrame(geometry=layers[1],crs=CRS)
+linSuavi = geo.GeoDataFrame(geometry=layers[2],crs=CRS)
+vertex = geo.GeoDataFrame(geometry=layers[3],crs=CRS)
+pols = geo.GeoDataFrame(geometry=layers[4],crs=CRS)
+
+
+
+capas=[{'GDF':"linSimpli",'nom':"LineaCentral_Simplifficada",'tipo':"LINESTRING",'color':"black"},{'GDF':"linCen",'nom':"LineaCentral",'tipo':"LINESTRING",'color':"red"},
+       {'GDF':"linSuavi",'nom':"LineaCentral_Suavizada",'tipo':"LINESTRING",'color':"green"} ,{'GDF':"vertex",'nom':"PuntosOrdenados",'tipo':"POINT",'color':"blue"},
+       {'GDF':"pols",'nom':"Poligonos",'tipo':"POLYGON",'color':"gray"}]
+
+for c in capas:
+    nom = func.renombrar(f"DatosSalida/{c['nom']}.shp")
+    eval(f"{c['GDF']}.to_file('{nom}')")
     datos.append(nom)
-    tipos.append("POINT")
-    names.append(nom)
-    color.append("red")
-    
-    print(type(v2))
-    nom = f"DatosSalida/v2_.shp"
-    v2.to_file(nom)
-    datos.append(nom)
-    tipos.append("POLYGON")
-    names.append(nom)
-    color.append("blue")
-    
-    print(type(v2v))
-    nom = f"DatosSalida/v2v.shp"
-    v2v.to_file(nom)
-    datos.append(nom)
-    tipos.append("POLYGON")
-    names.append(nom)
-    color.append("green")
+    tipos.append(c['tipo'])
+    names.append(nom.split("/")[1])
+    color.append(c['color'])
 
 webMap.WebMAP(datos=datos,tipos=tipos,names=names,color=color)
 
