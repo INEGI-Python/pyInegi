@@ -1,3 +1,1 @@
-parametros = {"idioma": "es", "file": "DatosEntrada/prueba3.shp", "dist": 0.3, "cpu": 16, "web": 0, "rows": 3} 
-CRS='EPSG:6372'
-Poligonos = {'total': 3, 'cont': 1}
+parametros = {"file": "DatosEntrada/SinIslas.shp", "dist": 5, "simp": 6, "suavi": 5, "cpu": 16, "web": 0, "rows": -1, "CRS": "EPSG:6372", "cantPol": 170384} 

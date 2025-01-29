@@ -8,4 +8,4 @@ import pyInegi
 
 
 if __name__ == "__main__":
-   pyInegi.generalizacion.lineaCentral.LineaCentral(idioma="es",file="DatosEntrada/prueba3.shp",dist=0.3,cpu=16,web=0,rows=3)
+   pyInegi.generalizacion.lineacentral_sinhuecos.LineaCentral_SinHuecos(file="DatosEntrada/SinIslas.shp",dist=5,simp=6,suavi=5,cpu=16,web=0,rows=-1)
