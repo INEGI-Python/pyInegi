@@ -23,8 +23,12 @@ def suavecito(coords, refinements=5):
         for i in range(len(coords) - 1):
             p0 = coords[i]
             p1 = coords[i + 1]
-            new_coords.append((0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1]))
-            new_coords.append((0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1]))
+            new_coords.extend(
+                (
+                    (0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1]),
+                    (0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1]),
+                )
+            )
         new_coords.append(coords[-1])
         coords = new_coords
     return coords
@@ -57,13 +61,11 @@ def enParalelo(row):
     geom = row[1].geometry
     segm = geom.buffer(0).segmentize(p['dist'])
     puntos=list(segm.exterior.coords)
+    func.imp(f"Procesando poligono {row[0]} - PID: {os.getpid()}")
     if len(segm.interiors)>0:
         return []
-    #for interior in segm.interiors:
-        #puntos.extend(list(interior.coords))
     v1 = Voronoi(np.array(puntos))
     vtx_in = [v for v in v1.vertices if Point(v).intersects(geom) ]
-    #v1_df = geo.GeoDataFrame(data=[{"id":i} for i in range(1,len(vtx_in)+1)],geometry=[Point(*v) for  v in vtx_in],crs=p['CRS'])
     if len(vtx_in)>1:
         fact=2
         pntOrd = linea_central_distancia(vtx_in,puntos[0])[::-1]
@@ -75,14 +77,14 @@ def enParalelo(row):
             fact += 1
             if fact>4:
                 return []
-       
         layers.append(LineString(pntOrd))
         #punt_df = geo.GeoDataFrame(geometry=[Point(*p) for p  in pntOrd], crs=p['CRS'])
         simpli = geo.GeoDataFrame(geometry=[LineString(simplecito(pntOrd,p['simp']))],crs=p['CRS'])
         layers.append(LineString(simpli.__geo_interface__['features'][0]['geometry']['coordinates']))
-        layers.append(LineString(simplecito(suavecito(list(simpli.__geo_interface__['features'][0]['geometry']['coordinates']),p['suavi']),p['simp']*1.3)))
+        layers.append(LineString(simplecito(suavecito(list(simpli.__geo_interface__['features'][0]['geometry']['coordinates']),p['suavi']),p['simp'])))
         layers.append(segm)
         layers.append([Point(*p) for p  in pntOrd])
+    
     return layers
 
 
@@ -107,7 +109,7 @@ def LineaCentral_SinHuecos(**a):
         linSimpli = geo.GeoDataFrame(geometry=vecSimpli,crs=CRS)  
         linSuavi = geo.GeoDataFrame(geometry=vecSuavi,crs=CRS)   
     
-        print(f"Poligonos procesados -->  {a['rows']}   Tiempo: {t()-ini} seg.")
+        print(f"Poligonos procesados -->  {a['cantPol']}   Tiempo: {t()-ini} seg.")
 
         if a['web']==1:
             capas=[{'GDF':"linSimpli",'nom':"LineaCentral_Simplifficada",'tipo':"LINESTRING",'color':"black"},{'GDF':"linCen",'nom':"LineaCentral",'tipo':"LINESTRING",'color':"red"},{'GDF':"linSuavi",'nom':"LineaCentral_Suavizada",'tipo':"LINESTRING",'color':"green"}] 
