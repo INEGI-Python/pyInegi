@@ -138,7 +138,7 @@ def LineaCentral_SinHuecos(**a):
 
 
 if __name__ == "__main__":
-	args = argparse.ArgumentParser(description="Regresa  las líneas centrales de cualquier polígono en formato shape")
+	args = argparse.ArgumentParser(description="Regresa  las líneas centrales de poligons largos y sin huecos")
 	args.add_argument("file",type=str,help="Ruta de la capa de polígonos")
 	args.add_argument("dist",type=int,nargs="?",default=10,help="Longitud máxima de las líneas al segmentar los polígonos. DEFAULT 10 m")
 	args.add_argument("simp",type=int,nargs="?",default=12,help="Longitud minima de vertice a vertice despues del simplificadp. DEFAULT 12 m")
