@@ -8,6 +8,10 @@ from time import time as t,localtime as lc
 
 
 
+def add_noise(points, noise_level=1e-9):
+    noise = np.random.normal(scale=noise_level, size=points.shape)
+    return points + noise
+
 def renombrar(name):
 	noms = name.split(".")
 	if not os.path.exists(name): 

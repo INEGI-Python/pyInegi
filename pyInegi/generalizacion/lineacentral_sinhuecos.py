@@ -15,6 +15,9 @@ def variables(a):
     ruta=os.getcwd()
     with open(f"{ruta}/pyInegi/auxiliar/variables.py", "w") as _var:
         _var.write(f"parametros = {json.dumps(a)} \n")
+        _var.write(f"cont = [] \n")
+        _var.write("def contar(n):\n")
+        _var.write("\tcont.append(n)\n")
         _var.close()
 
 def suavecito(coords, refinements=5):
@@ -45,7 +48,7 @@ def simplecito(coords,dist):
     return new_coords
 
 def linea_central_distancia(puntos,pun):
-    puntos = np.array(puntos)
+    #puntos = np.array(puntos)
     distancias = distance.cdist(puntos, np.array([pun]))
     distancias_minimas = np.zeros(len(puntos))
     for i in range(len(puntos)):
@@ -56,23 +59,30 @@ def linea_central_distancia(puntos,pun):
 
 
 def enParalelo(row):
-    from pyInegi.auxiliar.variables import parametros as p
+    from pyInegi.auxiliar.variables import contar
+    contar(1)
+    from pyInegi.auxiliar.variables import parametros as p, cont  
     layers = []
     geom = row[1].geometry
     segm = geom.buffer(0).segmentize(p['dist'])
     puntos=list(segm.exterior.coords)
-    func.imp(f"Procesando poligono {row[0]} - PID: {os.getpid()}")
+    if len(cont)%100==0:
+        func.imp(f" Procesando poligono {row[0]} - PID: {os.getpid()}")
     if len(segm.interiors)>0:
         return []
-    v1 = Voronoi(np.array(puntos))
-    vtx_in = [v for v in v1.vertices if Point(v).intersects(geom) ]
+    try:
+        v1 = Voronoi(np.array(puntos))
+        vtx_in = [v for v in v1.vertices if Point(v).intersects(geom) ]
+    except Exception as e:
+        return []
+    
     if len(vtx_in)>1:
         fact=2
-        pntOrd = linea_central_distancia(vtx_in,puntos[0])[::-1]
+        pntOrd = linea_central_distancia(np.array(vtx_in),puntos[0])[::-1]
         linea = LineString(pntOrd)
         while not linea.is_simple:
             pos = int(len(puntos)/fact)
-            pntOrd = linea_central_distancia(vtx_in,puntos[pos])[::-1]
+            pntOrd = linea_central_distancia(np.array(vtx_in),puntos[pos])[::-1]
             linea = LineString(pntOrd)
             fact += 1
             if fact>4:
