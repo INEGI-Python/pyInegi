@@ -12,8 +12,6 @@ from time import time as t
 
 
 def variables(a):
-    ruta=os.getcwd()
-    print(ruta)
     with open(f"variables.py", "w") as _var:
         _var.write(f"parametros = {json.dumps(a)} \n")
         _var.write(f"cont = [] \n")
@@ -102,6 +100,7 @@ def enParalelo(row):
 
 def LineaCentral_SinHuecos(**a):
     ini=t()
+    ruta=os.getcwd()
     dat = geo.read_file(a['file'],rows=None if a["rows"]==-1 else a["rows"])
     CRS = dat.crs.to_string()
     a['CRS']=CRS
@@ -122,6 +121,7 @@ def LineaCentral_SinHuecos(**a):
     
         print(f"Poligonos procesados -->  {a['cantPol']}   Tiempo: {t()-ini} seg.")
         if not os.path.exists("DatosSalida"):
+            print(ruta)
             os.mkdir("DatosSalida")
         if a['web']==1:
             capas=[{'GDF':"linSimpli",'nom':"LineaCentral_Simplifficada",'tipo':"LINESTRING",'color':"black"},{'GDF':"linCen",'nom':"LineaCentral",'tipo':"LINESTRING",'color':"red"},{'GDF':"linSuavi",'nom':"LineaCentral_Suavizada",'tipo':"LINESTRING",'color':"green"}] 
