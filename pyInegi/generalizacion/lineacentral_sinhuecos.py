@@ -13,6 +13,7 @@ from time import time as t
 
 def variables(a):
     ruta=os.getcwd()
+    print(ruta)
     with open(f"{ruta}/pyInegi/auxiliar/variables.py", "w") as _var:
         _var.write(f"parametros = {json.dumps(a)} \n")
         _var.write(f"cont = [] \n")
