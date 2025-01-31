@@ -14,7 +14,7 @@ from time import time as t
 def variables(a):
     ruta=os.getcwd()
     print(ruta)
-    with open(f"{ruta}/pyInegi/auxiliar/variables.py", "w") as _var:
+    with open(f"variables.py", "w") as _var:
         _var.write(f"parametros = {json.dumps(a)} \n")
         _var.write(f"cont = [] \n")
         _var.write("def contar(n):\n")
@@ -60,9 +60,9 @@ def linea_central_distancia(puntos,pun):
 
 
 def enParalelo(row):
-    from pyInegi.auxiliar.variables import contar
+    from variables import contar
     contar(1)
-    from pyInegi.auxiliar.variables import parametros as p, cont  
+    from variables import parametros as p, cont  
     layers = []
     geom = row[1].geometry
     segm = geom.buffer(0).segmentize(p['dist'])

@@ -1,6 +1,6 @@
-#import pyInegi
-#if __name__ == "__main__":
-#   pyInegi.generalizacion.lineacentral_sinhuecos.LineaCentral_SinHuecos(file="DatosEntrada/SinIslas.shp",dist=1,simp=3,suavi=3,cpu=16,web=0,rows=-1)
+import pyInegi
+if __name__ == "__main__":
+   pyInegi.generalizacion.lineacentral_sinhuecos.LineaCentral_SinHuecos(file="DatosEntrada/SinIslas.shp",dist=1,simp=3,suavi=3,cpu=16,web=0,rows=100)
 
 
 #pyInegi.ayuda()
@@ -12,10 +12,10 @@
 
 
 
-import httpimport
+#import httpimport
 
-with httpimport.remote_repo("https://github.com/INEGI-Python/pyInegi.git"):
-	import pyInegi
-	pyInegi.ayuda()
+#with httpimport.remote_repo("https://github.com/INEGI-Python/pyInegi.git"):
+#	import pyInegi
+#	pyInegi.ayuda()
 	
 
