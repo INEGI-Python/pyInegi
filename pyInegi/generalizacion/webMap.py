@@ -33,7 +33,8 @@ def WebMAP(**param):
 		))
 	fol.TileLayer("OpenStreetMap",show=True).add_to(capas[-1])
 	fol.LayerControl().add_to(capas[-1])
-	capas[-1].show_in_browser()
+	capas[-1].show_in_browser() if param['web']==1 else capas[-1]
+
     
 
 if __name__ == "__main__":
@@ -42,6 +43,7 @@ if __name__ == "__main__":
 	parser.add_argument('tipos',type=str,  help="Tipo de geometria. POINT, LINESTRING,POLYGON,MULTILINESTRING,MULTIPOLYGON, separadas por  comas respectivamente con las  fuentes de datos")
 	parser.add_argument("nombres",type=str, nargs='?', default="Layer", help="Nombre con el  que apareceran en el mapa")
 	parser.add_argument("color",type=str, nargs='?', default="black", help="Color de los elementos a mostrar")
+	parser.add_argument("web",type=int, nargs='?', default=1, help="Si es cero el grafico se mostrara en una ventana del sistema operativo")
 	args = parser.parse_args()
 	datos = args.datos.split(",")
 	tipos  = args.tipos.split(",")
@@ -55,9 +57,9 @@ if __name__ == "__main__":
 		exit()
 	if len(names)==1 and  len(names)!=len(datos):
 	
-		WebMAP(datos=datos,tipos=tipos,names=names*len(datos),color=color)
+		WebMAP(datos=datos,tipos=tipos,names=names*len(datos),color=color,web=args.web)
 	else:
-		WebMAP(datos=datos,tipos=tipos,names=names,color=color)
+		WebMAP(datos=datos,tipos=tipos,names=names,color=color,web=args.web)
 	
 
 
