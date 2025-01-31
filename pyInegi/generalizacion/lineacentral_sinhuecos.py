@@ -121,7 +121,8 @@ def LineaCentral_SinHuecos(**a):
         linSuavi = geo.GeoDataFrame(geometry=vecSuavi,crs=CRS)   
     
         print(f"Poligonos procesados -->  {a['cantPol']}   Tiempo: {t()-ini} seg.")
-
+        if not os.path.exists("DatosSalida"):
+            os.mkdir("DatosSalida")
         if a['web']==1:
             capas=[{'GDF':"linSimpli",'nom':"LineaCentral_Simplifficada",'tipo':"LINESTRING",'color':"black"},{'GDF':"linCen",'nom':"LineaCentral",'tipo':"LINESTRING",'color':"red"},{'GDF':"linSuavi",'nom':"LineaCentral_Suavizada",'tipo':"LINESTRING",'color':"green"}] 
             datos,tipos,names,color=[],[],[],[]
