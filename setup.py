@@ -20,6 +20,7 @@ setup(
         'scipy',
         'fiona',
         'euclid3',
-        'rtree'
+        'rtree',
+		'psutil'
     ],
 )
