@@ -123,7 +123,7 @@ def LineaCentral_SinHuecos(**a):
                 color.append(c['color'])
             webMap.WebMAP(datos=datos,tipos=tipos,names=names,color=color)
         else:
-            linSuavi.to_file(func.renombrar(f"DatosSalida/LineasCentralSuavizada.shp"))
+            linSuavi.to_file(func.renombrar("DatosSalida/LineasCentralSuavizada.shp"))
 
 
 

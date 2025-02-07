@@ -9,3 +9,4 @@ import pyInegi
 
 if __name__ == "__main__":
    pyInegi.generalizacion.lineacentral_sinhuecos.LineaCentral_SinHuecos(file="DatosEntrada/SinIslas.shp",dist=2,simp=3,suavi=3,cpu=4,web=0,rows=-1)
+
