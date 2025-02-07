@@ -1,7 +1,7 @@
 from .basico import funciones,polyskel,shapely_tools
 from .generalizacion import lineaCentral,reducePuntos,webMap
 import webbrowser
-__version__="1.0.0"
+__version__="0.0.1"
 __ALL__ = ["generalizacion","ayuda","descripcion","reducePuntos","lineaCentral","lineacentral_sinhuecos","webMap","basico"]
 
 

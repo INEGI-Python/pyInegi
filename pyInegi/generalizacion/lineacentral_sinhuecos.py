@@ -12,9 +12,11 @@ from time import time as t
 
 
 def variables(a):
-    ruta=os.getcwd()
-    with open(f"{ruta}/pyInegi/auxiliar/variables.py", "w") as _var:
+    with open(f"variables.py", "w") as _var:
         _var.write(f"parametros = {json.dumps(a)} \n")
+        _var.write(f"cont = [] \n")
+        _var.write("def contar(n):\n")
+        _var.write("\tcont.append(n)\n")
         _var.close()
 
 def suavecito(coords, refinements=5):
@@ -45,7 +47,7 @@ def simplecito(coords,dist):
     return new_coords
 
 def linea_central_distancia(puntos,pun):
-    puntos = np.array(puntos)
+    #puntos = np.array(puntos)
     distancias = distance.cdist(puntos, np.array([pun]))
     distancias_minimas = np.zeros(len(puntos))
     for i in range(len(puntos)):
@@ -56,23 +58,30 @@ def linea_central_distancia(puntos,pun):
 
 
 def enParalelo(row):
-    from pyInegi.auxiliar.variables import parametros as p
+    from variables import contar
+    contar(1)
+    from variables import parametros as p, cont  
     layers = []
     geom = row[1].geometry
     segm = geom.buffer(0).segmentize(p['dist'])
     puntos=list(segm.exterior.coords)
-    func.imp(f"Procesando poligono {row[0]} - PID: {os.getpid()}")
+    if len(cont)%100==0:
+        func.imp(f" Procesando poligono {row[0]} - PID: {os.getpid()}")
     if len(segm.interiors)>0:
         return []
-    v1 = Voronoi(np.array(puntos))
-    vtx_in = [v for v in v1.vertices if Point(v).intersects(geom) ]
+    try:
+        v1 = Voronoi(np.array(puntos))
+        vtx_in = [v for v in v1.vertices if Point(v).intersects(geom) ]
+    except Exception as e:
+        return []
+    
     if len(vtx_in)>1:
         fact=2
-        pntOrd = linea_central_distancia(vtx_in,puntos[0])[::-1]
+        pntOrd = linea_central_distancia(np.array(vtx_in),puntos[0])[::-1]
         linea = LineString(pntOrd)
         while not linea.is_simple:
             pos = int(len(puntos)/fact)
-            pntOrd = linea_central_distancia(vtx_in,puntos[pos])[::-1]
+            pntOrd = linea_central_distancia(np.array(vtx_in),puntos[pos])[::-1]
             linea = LineString(pntOrd)
             fact += 1
             if fact>4:
@@ -91,6 +100,7 @@ def enParalelo(row):
 
 def LineaCentral_SinHuecos(**a):
     ini=t()
+    ruta=os.getcwd()
     dat = geo.read_file(a['file'],rows=None if a["rows"]==-1 else a["rows"])
     CRS = dat.crs.to_string()
     a['CRS']=CRS
@@ -110,7 +120,9 @@ def LineaCentral_SinHuecos(**a):
         linSuavi = geo.GeoDataFrame(geometry=vecSuavi,crs=CRS)   
     
         print(f"Poligonos procesados -->  {a['cantPol']}   Tiempo: {t()-ini} seg.")
-
+        if not os.path.exists("DatosSalida"):
+            print(ruta)
+            os.mkdir("DatosSalida")
         if a['web']==1:
             capas=[{'GDF':"linSimpli",'nom':"LineaCentral_Simplifficada",'tipo':"LINESTRING",'color':"black"},{'GDF':"linCen",'nom':"LineaCentral",'tipo':"LINESTRING",'color':"red"},{'GDF':"linSuavi",'nom':"LineaCentral_Suavizada",'tipo':"LINESTRING",'color':"green"}] 
             datos,tipos,names,color=[],[],[],[]
@@ -121,14 +133,14 @@ def LineaCentral_SinHuecos(**a):
                 tipos.append(c['tipo'])
                 names.append(nom.split("/")[1])
                 color.append(c['color'])
-            webMap.WebMAP(datos=datos,tipos=tipos,names=names,color=color)
+            webMap.WebMAP(datos=datos,tipos=tipos,names=names,color=color,web=a['web'])
         else:
             linSuavi.to_file(func.renombrar("DatosSalida/LineasCentralSuavizada.shp"))
 
 
 
 if __name__ == "__main__":
-	args = argparse.ArgumentParser(description="Regresa  las líneas centrales de cualquier polígono en formato shape")
+	args = argparse.ArgumentParser(description="Regresa  las líneas centrales de poligons largos y sin huecos")
 	args.add_argument("file",type=str,help="Ruta de la capa de polígonos")
 	args.add_argument("dist",type=int,nargs="?",default=10,help="Longitud máxima de las líneas al segmentar los polígonos. DEFAULT 10 m")
 	args.add_argument("simp",type=int,nargs="?",default=12,help="Longitud minima de vertice a vertice despues del simplificadp. DEFAULT 12 m")

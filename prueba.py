@@ -1,4 +1,8 @@
 import pyInegi
+if __name__ == "__main__":
+   pyInegi.generalizacion.lineacentral_sinhuecos.LineaCentral_SinHuecos(file="DatosEntrada/SinIslas.shp",dist=1,simp=3,suavi=3,cpu=16,web=0,rows=100)
+
+
 #pyInegi.ayuda()
 
 
@@ -7,6 +11,16 @@ import pyInegi
 #pyInegi.generalizacion.webMap.WebMAP(datos=["DatosSalida/resQuitaVtx.shp"],tipos=["POLYGON"],names=["Layer"],color=["red"])
 
 
+<<<<<<< HEAD
 if __name__ == "__main__":
    pyInegi.generalizacion.lineacentral_sinhuecos.LineaCentral_SinHuecos(file="DatosEntrada/SinIslas.shp",dist=2,simp=3,suavi=3,cpu=4,web=0,rows=-1)
+=======
+
+#import httpimport
+
+#with httpimport.remote_repo("https://github.com/INEGI-Python/pyInegi.git"):
+#	import pyInegi
+#	pyInegi.ayuda()
+	
+>>>>>>> 8de30408f19553c12522df036bdfa4c0362ac1fa
 
