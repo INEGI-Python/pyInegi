@@ -1,4 +1,5 @@
 import argparse as ag
+from jinja2 import is_undefined
 import numpy as np
 import folium as fol
 import geopandas as geo
@@ -8,7 +9,7 @@ def WebMAP(**param):
 	capas = [None]
 	for i in range(len(param['datos'])):
 		style=dict()
-		tmp = geo.read_file(param["datos"][i])
+		tmp = geo.read_file(param["datos"][i],rows=None if is_undefined(param["rows"]) else param["rows"])
 		CRS = tmp.crs.to_string()
 		# Configrar los estilos según el tipo de geometría
 		if param["tipos"][i].upper() == "POINT":
