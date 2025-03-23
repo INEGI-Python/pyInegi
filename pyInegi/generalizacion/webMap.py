@@ -1,5 +1,4 @@
 import argparse as ag
-from jinja2 import is_undefined
 import numpy as np
 import folium as fol
 import geopandas as geo
@@ -9,23 +8,18 @@ def WebMAP(**param):
 	capas = [None]
 	for i in range(len(param['datos'])):
 		style=dict()
-		tmp = geo.read_file(param["datos"][i],rows=None if is_undefined(param["rows"]) else param["rows"])
+		tmp = geo.read_file(param["datos"][i],rows=param["rows"] if param.get("rows") else None)
 		CRS = tmp.crs.to_string()
 		# Configrar los estilos según el tipo de geometría
 		if param["tipos"][i].upper() == "POINT":
-			style = dict(
-				radius=2,
-				color=param["color"][i],
-				weight=1,
-				opacity=1,
-				fillOpacity=0.7
-			)
+			style = dict(radius=2,fillOpacity=0.7)
+			for e in param["estilo"][i].keys():
+				style[e]=param["estilo"][i][e]
 		else:  # Para LINESTRING, POLYGON, etc.
-			style = dict(
-				color=param["color"][i],
-				weight=3,
-				opacity=1
-			)	
+			style = dict(stroke=True)
+			for e in param["estilo"][i].keys():
+				style[e]=param["estilo"][i][e]
+
 		capas.append(tmp.explore(
 			m=capas[-1],
 			name=param["names"][i],
@@ -42,28 +36,19 @@ if __name__ == "__main__":
 	parser = ag.ArgumentParser(description="Genera un Mapa Web de las capas de datos que el usuario cargue. Soporta ShapeFile, FeatureClass, GeoJson ")
 	parser.add_argument('datos',type=str, help="Ruta absoluta o relativa  de las fuentes de Datos sepradas por comas")
 	parser.add_argument('tipos',type=str,  help="Tipo de geometria. POINT, LINESTRING,POLYGON,MULTILINESTRING,MULTIPOLYGON, separadas por  comas respectivamente con las  fuentes de datos")
-	parser.add_argument("nombres",type=str, nargs='?', default="Layer", help="Nombre con el  que apareceran en el mapa")
-	parser.add_argument("color",type=str, nargs='?', default="black", help="Color de los elementos a mostrar")
+	parser.add_argument("nombres",type=str, nargs='?', default="Layer", help="Nombres de las capas separadas por comas")
+	parser.add_argument("estilo",type=str, nargs='?', default="red-black", help="Color de relleno-borde separados por comas. DEFAULT: red-black")
 	parser.add_argument("web",type=int, nargs='?', default=1, help="Si es cero el grafico se mostrara en una ventana del sistema operativo")
 	args = parser.parse_args()
 	datos = args.datos.split(",")
 	tipos  = args.tipos.split(",")
 	names = args.nombres.split(",")       
-	color = args.color.split(",")           
+	colores = args.estilos.split(",")           
 	if len(datos)!=len(tipos):
 		print("[ERROR] La cantidad de fuentes datos no coincide con la cantidad de tipos")
 		exit()
 	if len(names)>1 and  len(names)!=len(datos):
 		print("[ERROR] La cantidad de propiedades no coincide con la cantidad de datos")
 		exit()
-	if len(names)==1 and  len(names)!=len(datos):
-	
-		WebMAP(datos=datos,tipos=tipos,names=names*len(datos),color=color,web=args.web)
-	else:
-		WebMAP(datos=datos,tipos=tipos,names=names,color=color,web=args.web)
-	
-
-
-
-
-	##  pyInegi.generalizacion.webMap(datos=["DatosSalida/borde.shp","DatosSalida/lineaCentral.shp"],tipos=["LINESTRING","LINESTRING"],names=["¨Poñigono manzanas","Lineas Centrales"],color=["red","blue"])
+	estilo = [dict(fillColor=c.split("-")[0],color=c.split("-")[1]) for c in colores]
+	WebMAP(datos=datos,tipos=tipos,names=names,estilo=estilo,web=args.web)
