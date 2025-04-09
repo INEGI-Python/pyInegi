@@ -96,7 +96,7 @@ def ReducePuntos(**params):
 		os.chdir(_d)
 	archivo=f"{fechaHora()}.shp"
 	agrupados.to_file(archivo,encoding="UTF-8")
-	imp(f"{os.getcwd().replace("\\","/")}/{archivo}")
+	imp(os.getcwd().replace("\\","/")+"/"+archivo)
 	os.chdir(miDir)
 	if ver==1:
 		DF_visi,DF_ocul,geomDF = Generar_Plot(agrupados, distancia, CRS) 
