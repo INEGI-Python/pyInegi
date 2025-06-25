@@ -119,7 +119,8 @@ if __name__ == "__main__":
 		import fiona
 		print(eval(args.FEAT))
 	else:
-		ReducePuntos(args)
+		#ReducePuntos(args)
+		ReducePuntos(gdb=args.gdb,feat=args.feat,camp=args.camp.split(","),dist=args.dist,ver=args.ver)
 		#inicio_rp(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP.split(","),dist=args.DIST,ver=args.VER)
 #else:
 #   main(gdb='datos/prueba2.shp', feat='_', camp="Jerarquia:1,geografico:1,num_hab:0".split(","),dist=1500,ver=1) 
