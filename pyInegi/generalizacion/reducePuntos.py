@@ -20,7 +20,7 @@ def crearGpos(_dataF,CRS,distancia):
 	cont = gpos.count(numeric_only=True)['id']
 	agrupados = _dataF.sjoin(gpos,how="inner",predicate='intersects')
 	agrupados["gpo"]=agrupados['id_right']
-	agrupados = agrupados.drop(columns=['index_right0','index_right1','id'])
+	agrupados = agrupados.drop(columns=['index_right0','index_right1','id_right'])
 	imp("Total de Grupos generados: %d" % cont)
 	porGPO = agrupados.groupby(by="gpo").groups
 	return gpos,agrupados,porGPO
