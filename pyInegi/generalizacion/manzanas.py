@@ -3,14 +3,19 @@
 
 
 import argparse
+import numpy as np
+from turtle import pu
 import geopandas as geo
 import matplotlib
+import shapely
 matplotlib.use("TkAgg") 
 import matplotlib.pyplot as plt
 from time import time as t
+import alphashape
 
 
 def quitaPrivadas(a):
+	
 	gdf = None
 	fuente=a.file.split("/" or "\\")
 	if fuente[-1].split(".")[-1] not in ["shp","gpkg","geojson"]:
@@ -22,10 +27,15 @@ def quitaPrivadas(a):
 	else:
 		gdf = geo.read_file(a.file)
 	print("Leyendo capa...")
-	#print(gdf)
-	gdf.plot()
-	plt.title("Manzanas originales")
-	plt.show()
+	puntos = gdf.extract_unique_points()
+	for p in puntos.geometry:
+		result=alphashape.alphashape(geo.GeoDataFrame(geometry=[p.__geo_interface__["coordinates"][0]],crs=gdf.crs),0.95)
+		print(result)
+		result = geo.GeoDataFrame(geometry=[result],crs=gdf.crs)
+		result.plot()
+		plt.title("Manzanas "+str(p.length))
+		plt.show()
+	
 
 
 
