@@ -5,6 +5,7 @@
 /RESULTADOS
 /.myVenv
 /.myVenv2
+/.myVenvPro
 /MOPIGMA.gdb
 *.pyc
 /__pycache__
