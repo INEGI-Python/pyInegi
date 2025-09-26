@@ -11,4 +11,3 @@ fiona
 euclid3
 rtree
 psutil
-alphashape
