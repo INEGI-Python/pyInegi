@@ -1,5 +1,5 @@
 from .basico import funciones,polyskel,shapely_tools
-from .generalizacion import lineaCentral,reducePuntos,webMap,manzanas
+from .generalizacion import lineaCentral,reducePuntos,webMap,manzanas,puntosColineares
 from .auxiliar.datosEjemplos import features,paramMzas
 import webbrowser
 __version__="0.0.8"
