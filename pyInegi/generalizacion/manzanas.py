@@ -1,3 +1,4 @@
+import sys,os
 import numpy as np
 import argparse
 import geopandas as geo
@@ -14,7 +15,6 @@ def shp(dat,nom):
     dat.to_file(f"DatosSalida/{nom}", driver="ESRI Shapefile")
 
 def remove_colinear_points(geom, tolerance=5):
-		print(geom.geom_type)
 		if geom.geom_type == "Polygon":
 			coords = list(geom.exterior.coords)
 			new_coords = [coords[0]]
@@ -25,7 +25,6 @@ def remove_colinear_points(geom, tolerance=5):
 				v1 = p1 - p0
 				v2 = p2 - p1
 				cross = np.cross(v1, v2)
-				print(np.abs(cross))
 				if np.abs(cross) > tolerance:
 					new_coords.append(coords[i])
 			new_coords.append(coords[-1])
@@ -45,9 +44,7 @@ def generaTriangulos_lineasFuera(geom,dist,crs,i):
 	merged_lines = unary_union(all_lines)
 	polygons = list(polygonize(merged_lines))
 	polygons = [unary_union(polygons)]
-	gdf_polygons = geo.GeoDataFrame(geometry=polygons, crs=gdf.crs)
-	shp(gdf_polygons,f"poligonoGenerado_{i}.shp")
-	return gdf_polygons
+	return polygons
 
 def quitaPrivadas(a):
 	gdf = None
@@ -56,20 +53,25 @@ def quitaPrivadas(a):
 	ini = t()
 	if fuente[-1].split(".")[-1] not in ["shp","gpkg","geojson"]:
 		if fuente[-2].split(".")[-1] == "gdb":
-			gdf = geo.read_file(a.file[0:len(a.file)-len(fuente[-1])],layer=fuente[-1])
+			gdf = geo.read_file(a.file[0:len(a.file)-len(fuente[-1])],layer=fuente[-1],rows=a.rows)
 		else:
 			raise ValueError("El archivo debe ser un shapefile, geopackage,geojson o feature class dentro de un geodatabase")
 	else:
-		gdf = geo.read_file(a.file)	
-	# Elimina ángulos colineales de las geometrías en gdf
+		gdf = geo.read_file(a.file,rows=a.rows)	
+	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
 	gdf["geometry"] = gdf["geometry"].apply(remove_colinear_points)
+	os.mkdir("DatosSalida") if not os.path.exists("DatosSalida") else None
 	shp(gdf,"manzanas_sin_colineales.shp")
-
-	for i in gdf.head(a.rows).index:
-		generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i).plot()
-		plt.title(f"Polígonos generados {i}")
-	plt.show()
+	poligonos = [generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i) for i in gdf.head().index]
 	print("Proceso finalizado. Tiempo: %.3f seg" % (t()-ini))
+	print("Mostrando resultados...")
+	poligonos_gdf = geo.GeoDataFrame(geometry=[poly for sublist in poligonos for poly in sublist], crs=gdf.crs)
+	shp(poligonos_gdf,"manzanas_sin_privadas.shp")
+	poligonos_gdf.plot(facecolor="none",edgecolor="blue")
+	plt.title("Manzanas sin privadas ni áreas comunes")
+	gdf.plot(facecolor="none",edgecolor="red")
+	plt.title("Manzanas originales")
+	plt.show()
 
 if __name__ == "__main__":
 	args = argparse.ArgumentParser(description="Generaliza manzanas con privadas y áreas comunes")
