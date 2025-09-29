@@ -1,6 +1,6 @@
 from .basico import funciones,polyskel,shapely_tools
 from .generalizacion import lineaCentral,reducePuntos,webMap,manzanas
-from .auxiliar.datosEjemplos import shapes,parametros
+from .auxiliar.datosEjemplos import shapes,paramMzas
 import webbrowser
 __version__="0.0.1"
 __ALL__ = ["generalizacion","ayuda","descripcion","reducePuntos","lineaCentral","lineacentral_sinhuecos","webMap","basico","auxiliar"]
