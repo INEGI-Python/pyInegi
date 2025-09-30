@@ -34,6 +34,7 @@ def quitaPrivadas(a):
 	gdb =a.file[0:len(a.file)-len(fuente[-1])-1]
 	print(f"Geodatabase: {gdb}")
 	gdf = geo.read_file(gdb,layer=fuente[-1],rows=a.rows if a.rows>0 else None)
+	gdf.loc[:, "geometry"] = gdf.geometry.buffer(0)
 	print(gdf.index)
 	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
 	gdf["geometry"] = gdf["geometry"].apply(remove_colinear_points)
