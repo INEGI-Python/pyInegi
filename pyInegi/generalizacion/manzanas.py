@@ -1,10 +1,8 @@
-from operator import ge
-import os
 import argparse
 import geopandas as geo
 from time import time as t
 from shapely.ops import unary_union,polygonize
-from .puntosColineares import remove_colinear_points
+from puntosColineares import remove_colinear_points
 
 def feat(gdb,feature,nom):
 	feature.to_file(gdb,layer=nom, driver="OpenFileGDB")
