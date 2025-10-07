@@ -1,66 +1,50 @@
-import os,sys
+import os
+import shutil
 import geopandas as geo
+import   pandas as pan
+import fiona
+import argparse
 
 def gdb2gpkg(gdb_path, gpks_path):
-	if not os.path.exists(gdb_path):
-		raise FileNotFoundError(f"La geodatabase {gdb_path} no existe.")
-	
-	if os.path.exists(gpks_path):
-		raise FileExistsError(f"El archivo GeoPackage {gpks_path} ya existe.")
-	
-	os.getcwd()
-	gdb_gdf = geo.read_file(gdb_path)
-	gdb_gdf.to_file(gpks_path, driver="GPKG")
+	layers = fiona.listlayers(gdb_path)
+	for layer in layers:
+		gdf = geo.read_file(gdb_path, layer=layer)
+		gdf.to_file(gpks_path, layer=layer, driver="GPKG")
 
-	gdb_driver = ogr.GetDriverByName("OpenFileGDB")
-	gdb = gdb_driver.Open(gdb_path, 0)
-	if gdb is None:
-		raise RuntimeError(f"No se pudo abrir la geodatabase {gdb_path}.")
-	
-	gpks_driver = ogr.GetDriverByName("GPKG")
-	gpks = gpks_driver.CreateDataSource(gpks_path)
-	if gpks is None:
-		raise RuntimeError(f"No se pudo crear el GeoPackage {gpks_path}.")
-	
-	for i in range(gdb.GetLayerCount()):
-		layer = gdb.GetLayerByIndex(i)
-		layer_name = layer.GetName()
-		print(f"Procesando capa: {layer_name}")
-		
-		gpks_layer = gpks.CreateLayer(layer_name, geom_type=layer.GetGeomType(), srs=layer.GetSpatialRef())
-		if gpks_layer is None:
-			print(f"No se pudo crear la capa {layer_name} en el GeoPackage.")
-			continue
-		
-		layer_defn = layer.GetLayerDefn()
-		for j in range(layer_defn.GetFieldCount()):
-			field_defn = layer_defn.GetFieldDefn(j)
-			gpks_layer.CreateField(field_defn)
-		
-		gpks_layer_defn = gpks_layer.GetLayerDefn()
-		
-		for feature in layer:
-			new_feature = ogr.Feature(gpks_layer_defn)
-			new_feature.SetFrom(feature)
-			gpks_layer.CreateFeature(new_feature)
-			new_feature.Destroy()
-		
-		print(f"Capa {layer_name} procesada y guardada en el GeoPackage.")
-	
-	gdb.Destroy()
-	gpks.Destroy()
-	print(f"Conversión completada. Archivo guardado en {gpks_path}")
+def copy_without_gdb(src, dst,tmpl):
+	excel = pan.read_excel(f"{tmpl}/Caneva_Estados.xlsx",index_col=0)
+	excel.sort_index(inplace=True)
+	for root, dirs, files in os.walk(src):
+		root=root.replace("\\","/")
+		rel_path = os.path.relpath(root, src)
+		dst_dir = os.path.join(dst, rel_path).replace("\\","/")
+		os.makedirs(dst_dir, exist_ok=True)
+		if root==src:
+			x=dirs
+		else:
+			gdb = f"{root}/{str(dirs)[2:-2]}"
+			gpk = f"{dst_dir}/{str(dirs)[2:-5]}gpkg"
+			ent=root.split("/")[-1]
+			try:
+				orient = str(excel[excel['NOMGEO']==ent]["Orientacion"].values[:])[2:-2]
+				print(f"{ent}  -  {orient}")
+				shutil.copy2(f"{tmpl}/{orient}.qgz",f"{dst_dir}/{ent}.qgz")
+				gdb2gpkg(gdb,gpk)
+			except Exception as e:
+				print(e)
+		dirs[:] = [d for d in dirs if not d.lower().endswith('.gdb')]
 
-import argparse
+
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Convierte una geodatabase (GDB) a un GeoPackage (GPKG).")
-	parser.add_argument("gdb_path", type=str, help="Ruta al archivo de geodatabase (.gdb)")
-	parser.add_argument("gpks_path", type=str, help="Ruta al archivo de salida GeoPackage (.gpkg)")
-	
+	parser.add_argument("--version", action="version", version="gdb2gpkg 1.0")
+	parser.add_argument("--verbose", action="store_true", help="Muestra información detallada durante la ejecución.")
+	parser.add_argument("datos",type=str, help="Carpeta de los datos de  origen")
+	parser.add_argument("plantilla",type=str,help="Carpeta donde se encuentran las plantillas y el excel")
 	args = parser.parse_args()
-	
-	try:
-		gdb2gpks(args.gdb_path, args.gpks_path)
-	except Exception as e:
-		print(f"Error: {e}")
-		sys.exit(1)
+
+	copy_without_gdb(args.datos, f"{args.datos}_GPKG",args.plantilla)
+
+
+
+

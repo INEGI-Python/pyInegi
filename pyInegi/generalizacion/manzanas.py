@@ -4,15 +4,15 @@ from time import time as t
 from shapely.ops import unary_union,polygonize
 from puntosColineares import remove_colinear_points
 
-def feat(gdb,feature,nom):
-	feature.to_file(gdb,layer=nom, driver="OpenFileGDB")
+def feat(gdb,_gdf,nom):
+	_gdf.to_file(gdb,layer=nom, driver="OpenFileGDB")
 
 def generaTriangulos_lineasFuera(geom,dist,crs,i):
 	gdf=geo.GeoDataFrame(geometry= [geom],crs=crs)
 	triangulos = gdf.delaunay_triangles(tolerance=0,only_edges=True)
 	contorno = gdf.boundary
 	triangulos_outside = triangulos[~triangulos.within(gdf.union_all())]
-	gdf_outside = geo.GeoDataFrame(geometry=triangulos_outside, crs=gdf.crs)
+	gdf_outside = geo.GeoDataFrame(geometry=triangulos_outside, crs=crs)
 	mask_not_within_contorno = ~gdf_outside.geometry.apply(lambda line: any(line.within(bound) for bound in contorno))
 	mask_length_less_Xm = gdf_outside.geometry.length < dist
 	filtered_lines = gdf_outside[mask_not_within_contorno & mask_length_less_Xm]
@@ -36,20 +36,32 @@ def quitaPrivadas(a):
 	gdf["OBJECTID"] = gdf.index + 1
 	gdf.set_index("OBJECTID",inplace=True)
 	gdf.loc[:, "geometry"] = gdf.geometry.buffer(0)
-	campos = [c for c in gdf.columns if c not in ["geometry","objectid"]]
+	campos = [c for c in gdf.columns if c not in ["OBJECTID_1","geometry","objectid","Shape_Length","Shape_Area"]]
 	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
-	gdf["geometry"] = gdf["geometry"].apply(remove_colinear_points)
+	if a.angulo>0:
+		gdf.loc[:,"geometry"] = gdf.geometry.apply(remove_colinear_points,angulo=a.angulo)
+		#feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
+	print(gdf)
 	print("Generalizando polígonos...")
-	poligonos = [generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i) for i in gdf.index]
+	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
+
 	print("Proceso finalizado. Tiempo: %.3f seg" % (t()-ini))
 	print(f"Guardando resultados en la geodatabase...")
-	poligonos_gdf = geo.GeoDataFrame(geometry=[poly for sublist in poligonos for poly in sublist], crs=gdf.crs)
-	for col in campos:
-		poligonos_gdf[col] = None
-	for idx, polys in enumerate(poligonos):
-		for poly in polys:
-			for col in campos:
-				poligonos_gdf.loc[poligonos_gdf.geometry == poly, col] = gdf.iloc[idx][col]
+	poligonos_gdf = geo.GeoDataFrame(data=[{"OBJECID":i["id"]} for i in poligonos],geometry=[g["geom"] for g in poligonos],index=0, crs=gdf.crs)
+	print(poligonos_gdf.index)
+	#poligonos_gdf = geo.GeoDataFrame(geometry=[poly for sublist in poligonos for poly in sublist], crs=gdf.crs)
+	print(campos)
+
+	# for col in campos:
+	# 	poligonos_gdf[col] = None
+	# for idx, polys in enumerate(poligonos):
+	# 	print(polys)
+	# 	for poly in polys:
+	# 		for col in campos:
+	# 			poligonos_gdf.loc[poligonos_gdf.geometry == poly, col] = gdf.iloc[idx][col]
+
+
+	print(poligonos_gdf)
 	feat(gdb,poligonos_gdf,a.out)
 	if a.prev==1:
 		import matplotlib
@@ -69,6 +81,7 @@ if __name__ == "__main__":
 	args.add_argument("dist",type=int,help="Ancho máximo en metros del espacio a quitar.")
 	args.add_argument("out",type=str, help="Nombre del feature class de salida.")
 	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
+	args.add_argument("angulo",type=int ,nargs="?", default=5, help="Medida minima de los angulos en grados de tipo entrero, formados en cada vertice, entre 0° y 180°  ")
 	args.add_argument("prev",type=int,nargs="?",default=0,help="Si es 1, muestra una vista previa de los poligonos procesados. DEFAULT 0")
 	args = args.parse_args()
 	quitaPrivadas(args)        
