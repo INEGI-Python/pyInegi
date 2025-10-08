@@ -2,7 +2,7 @@ import argparse
 import geopandas as geo
 from time import time as t
 from shapely.ops import unary_union,polygonize
-from puntosColineares import remove_colinear_points
+from .puntosColineares import remove_colinear_points
 
 def feat(gdb,_gdf,nom):
 	_gdf.to_file(gdb,layer=nom, driver="OpenFileGDB")
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 	args.add_argument("dist",type=int,help="Ancho máximo en metros del espacio a quitar.")
 	args.add_argument("out",type=str, help="Nombre del feature class de salida.")
 	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
-	args.add_argument("angulo",type=int ,nargs="?", default=5, help="Medida minima de los angulos en grados de tipo entrero, formados en cada vertice, entre 0° y 180°  ")
+	args.add_argument("angulo",type=int ,nargs="?", default=0, help="Medida minima de los angulos en grados de tipo entrero, formados en cada vertice, entre 0° y 180° . DEFAULT 0")
 	args.add_argument("prev",type=int,nargs="?",default=0,help="Si es 1, muestra una vista previa de los poligonos procesados. DEFAULT 0")
 	args = args.parse_args()
 	quitaPrivadas(args)        
