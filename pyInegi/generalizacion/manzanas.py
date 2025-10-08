@@ -41,7 +41,6 @@ def quitaPrivadas(a):
 	if a.angulo>0:
 		gdf.loc[:,"geometry"] = gdf.geometry.apply(remove_colinear_points,angulo=a.angulo)
 		feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
-	print(gdf)
 	print("Generalizando polígonos...")
 	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
 
@@ -50,23 +49,13 @@ def quitaPrivadas(a):
 	poligonos_gdf = geo.GeoDataFrame(
 		data=[{"OBJECTID": i["id"]} for i in poligonos],
 		geometry=[i["geom"][0] for i in poligonos],
-		index=[i["id"] for i in poligonos],
 		crs=gdf.crs
 	)
-	print(poligonos_gdf.index)
-	#poligonos_gdf = geo.GeoDataFrame(geometry=[poly for sublist in poligonos for poly in sublist], crs=gdf.crs)
-	print(campos)
+	poligonos_gdf.set_index("OBJECTID",inplace=True)
 
-	# for col in campos:
-	# 	poligonos_gdf[col] = None
-	# for idx, polys in enumerate(poligonos):
-	# 	print(polys)
-	# 	for poly in polys:
-	# 		for col in campos:
-	# 			poligonos_gdf.loc[poligonos_gdf.geometry == poly, col] = gdf.iloc[idx][col]
-
-
-	print(poligonos_gdf)
+	for col in campos:
+		poligonos_gdf[col] = None
+		poligonos_gdf.loc[:,col]=gdf.loc[:,col]
 	feat(gdb,poligonos_gdf,a.out)
 	if a.prev==1:
 		import matplotlib
