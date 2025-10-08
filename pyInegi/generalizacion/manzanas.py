@@ -40,14 +40,19 @@ def quitaPrivadas(a):
 	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
 	if a.angulo>0:
 		gdf.loc[:,"geometry"] = gdf.geometry.apply(remove_colinear_points,angulo=a.angulo)
-		#feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
+		feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
 	print(gdf)
 	print("Generalizando polígonos...")
 	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
 
 	print("Proceso finalizado. Tiempo: %.3f seg" % (t()-ini))
 	print(f"Guardando resultados en la geodatabase...")
-	poligonos_gdf = geo.GeoDataFrame(data=[{"OBJECID":i["id"]} for i in poligonos],geometry=[g["geom"] for g in poligonos],index=0, crs=gdf.crs)
+	poligonos_gdf = geo.GeoDataFrame(
+		data=[{"OBJECTID": i["id"]} for i in poligonos],
+		geometry=[i["geom"][0] for i in poligonos],
+		index=[i["id"] for i in poligonos],
+		crs=gdf.crs
+	)
 	print(poligonos_gdf.index)
 	#poligonos_gdf = geo.GeoDataFrame(geometry=[poly for sublist in poligonos for poly in sublist], crs=gdf.crs)
 	print(campos)
