@@ -1,15 +1,22 @@
+from itertools import count
 import os
 import shutil
 import geopandas as geo
 import   pandas as pan
 import fiona
 import argparse
+import rasterio
 
-def gdb2gpkg(gdb_path, gpks_path):
+def gdb2gpkg(gdb_path, gpks_path,bati):
 	layers = fiona.listlayers(gdb_path)
 	for layer in layers:
 		gdf = geo.read_file(gdb_path, layer=layer)
 		gdf.to_file(gpks_path, layer=layer, driver="GPKG")
+	print(bati)
+	if os.path.exists(bati):
+		with rasterio.open(bati) as src:
+			print(dir(src))
+			rasterio.open(gpks_path,'w',driver="GPKG",width=src.width,height=src.height,count=src.count,dtype=src.dtype, crs=src.crs,transform=src.transform,layer="batimetriasombreado").write(src.read(),indexes=1)
 
 def copy_without_gdb(src, dst,tmpl):
 	excel = pan.read_excel(f"{tmpl}/Caneva_Estados.xlsx",index_col=0)
@@ -29,7 +36,10 @@ def copy_without_gdb(src, dst,tmpl):
 				orient = str(excel[excel['NOMGEO']==ent]["Orientacion"].values[:])[2:-2]
 				print(f"{ent}  -  {orient}")
 				shutil.copy2(f"{tmpl}/{orient}.qgz",f"{dst_dir}/{ent}.qgz")
-				gdb2gpkg(gdb,gpk)
+				if os.path.exists(f"{root}/batimetriasombreado.tif"):
+					print(os.path.exists(f"{root}/batimetriasombreado.tif"))		
+					shutil.copy2(f"{root}/batimetriasombreado.tif",f"{dst_dir}/batimetriasombreado.tif")
+				gdb2gpkg(gdb,gpk,f"{dst_dir}/batimetriasombreado.tif")
 			except Exception as e:
 				print(e)
 		dirs[:] = [d for d in dirs if not d.lower().endswith('.gdb')]
