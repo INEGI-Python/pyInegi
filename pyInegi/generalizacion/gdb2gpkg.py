@@ -22,23 +22,13 @@ def crearGPKG(esquema,crs,nom,features):
 		return datos
 
 
-def gdb2gpkg(gdb_path, gpks_path,_root,bati):
-	os.system(f"\"C:/Program Files/QGIS 3.40.10/bin/gdal_translate.exe\" -of GPKG -b 3 {tif} {gpks_path.replace("mapa_base.gpkg","batimetriasombreado.gpkg")}")
-	layers = fiona.listlayers(gdb_path)
-	for layer in layers:
-		gdf = geo.read_file(gdb_path, layer=layer)
-		gdf.to_file(gpks_path, layer=layer, driver="GPKG")
-	print("BATI   ",f"{_root}/{bati}")
-	if bati is not None:
-		with  ras.open(f"{_root}/{bati}","r") as tif:
-			geopack = f"{os.getcwd()}/img.gpkg"
-			print(geopack)
-			lay = ras.open(geopack,'w', driver="GPKG")
+def gdb2gpkg(gdb_path, gpks_path,cond,tif):
+	if cond is not None:
+		tmp = gpks_path.replace("mapa_base.gpkg","batimetriasombreado.gpkg")
+		print(tif,tmp)
+		os.system(f'"C:\\Program Files\\QGIS 3.40.10\\bin\\gdal_translate.exe" -of GPKG -b 3 {tif} {tmp}')
+		os.system(f"REN  {tmp}  {gpks_path}")
 
-def gdb2gpkg(gdb_path, gpks_path,tif):
-	tmp = gpks_path.replace("mapa_base.gpkg","batimetriasombreado.gpkg")
-	os.system(f"\"C:/Program Files/QGIS 3.40.10/bin/gdal_translate.exe\" -of GPKG -b 3 {tif} {tmp}")
-	os.system(f"REN  {tmp}  {gpks_path}")
 	layers = fiona.listlayers(gdb_path)
 	for layer in layers:
 		gdf = geo.read_file(gdb_path, layer=layer)
@@ -77,7 +67,7 @@ def copy_without_gdb(src, dst,tmpl):
 			shutil.copy2(f"{tmpl}/{orient}.qgz",f"{dst_dir}/{ent}.qgz")
 			bati = [f for f in files if f.endswith(".tif")]
 			bati = bati[0] if len(bati)>0 else None
-			gdb2gpkg(gdb,gpk,bati)
+			gdb2gpkg(gdb,gpk,bati,f"{root}/{bati}")
 		dirs[:] = [d for d in dirs if not d.lower().endswith('.gdb')]
 
 
