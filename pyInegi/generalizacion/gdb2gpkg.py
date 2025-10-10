@@ -5,7 +5,7 @@ import geopandas as geo
 import   pandas as pan
 import fiona
 import argparse
-import rasterio
+import rasterio as ras
 
 def gdb2gpkg(gdb_path, gpks_path,bati):
 	layers = fiona.listlayers(gdb_path)
@@ -14,9 +14,8 @@ def gdb2gpkg(gdb_path, gpks_path,bati):
 		gdf.to_file(gpks_path, layer=layer, driver="GPKG")
 	print(bati)
 	if os.path.exists(bati):
-		with rasterio.open(bati) as src:
-			print(dir(src))
-			rasterio.open(gpks_path,'w',driver="GPKG",width=src.width,height=src.height,count=src.count,dtype=src.dtype, crs=src.crs,transform=src.transform,layer="batimetriasombreado").write(src.read(),indexes=1)
+		img = ras.open(bati,mode="r",driver="GTiff")
+		ras.open(gpks_path,mode="w+",layer="batimetriasombreado",driver="GPKG",width=img.width,height=img.height,count=img.count,dtype=type(img),crs=img.crs,transform=img.transform).write(img.read(),indexes=1)
 
 def copy_without_gdb(src, dst,tmpl):
 	excel = pan.read_excel(f"{tmpl}/Caneva_Estados.xlsx",index_col=0)
