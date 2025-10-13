@@ -1,9 +1,8 @@
-from itertools import count
-import os
-import shutil
+import os,shutil
 import geopandas as geo
 import   pandas as pan
 import argparse
+import fiona
 import rasterio as ras
 
 def gdb2gpkg(gdb_path, gpks_path,cond,tif):
