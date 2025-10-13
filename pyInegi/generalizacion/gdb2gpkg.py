@@ -4,23 +4,7 @@ import shutil
 import geopandas as geo
 import   pandas as pan
 import argparse
-import fiona
-
-
-
-
-
-def crearRaster(tif):
-	os.system(f"C:/Program Files/QGIS 3.40.10/bin/gdal_translate.exe -of GPKG -b 3 {tif} batimetriasombreado.gpkg")
-
-
-
-def crearGPKG(esquema,crs,nom,features):
-	with fiona.open(nom,'w',driver='GPKG',crs=crs,schema=esquema) as datos:
-		for f in features:
-			datos.write(f)
-		return datos
-
+import rasterio as ras
 
 def gdb2gpkg(gdb_path, gpks_path,cond,tif):
 	if cond is not None:
@@ -33,20 +17,10 @@ def gdb2gpkg(gdb_path, gpks_path,cond,tif):
 	for layer in layers:
 		gdf = geo.read_file(gdb_path, layer=layer)
 		gdf.to_file(gpks_path, layer=layer, driver="GPKG")
-
-			
- 			
-			# print(tif.profile)
-			# profile=tif.profile
-			# profile.update(driver='GPKG', **{'Bike_size':'Tiled'} )
-			# with ras.open("img.gpkg",'w', **profile) as dts:
-			# 	dts.write(tif.read(),indexes=1)
-			# 	dts.write_tile(tif.read(),indexex=1)
-			# 	dts.set_bounds(raster_bounds(tif))
-			# 	dts.set_crs(tif.crs)
-			# 	dts.set_name("batimetriasombreado")
-	
-
+	print(bati)
+	if os.path.exists(bati):
+		img = ras.open(bati,mode="r",driver="GTiff")
+		ras.open(gpks_path,mode="w+",layer="batimetriasombreado",driver="GPKG",width=img.width,height=img.height,count=img.count,dtype=type(img),crs=img.crs,transform=img.transform).write(img.read(),indexes=1)
 
 def copy_without_gdb(src, dst,tmpl):
 	excel = pan.read_excel(f"{tmpl}/Caneva_Estados.xlsx",index_col=0)
