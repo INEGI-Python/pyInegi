@@ -42,7 +42,7 @@ def copy_without_gdb(src, dst,tmpl):
 			bati = [f for f in files if f.endswith(".tif")]
 			bati = bati[0] if len(bati)>0 else None
 			gdb2gpkg(gdb,gpk,bati,f"{root}/{bati}")
-			os.system(f'{dst_dir}/{ent}.qgz')
+			os.system(f'{os.getcwd()}/{dst_dir}/{ent}.qgz')
 		dirs[:] = [d for d in dirs if not d.lower().endswith('.gdb')]
 
 
