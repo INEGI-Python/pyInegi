@@ -10,7 +10,7 @@
 				"cwd": "${workspaceFolder}"
 			},
 			"problemMatcher": [],
-			"command": "cd /d ${workspaceFolder} && set PYTHONHOME=E:/APP_INSTALADAS/Python && set && python",
+			"command": "%e%", 
 			"group": {
 				"kind": "build",
 				"isDefault": true	
