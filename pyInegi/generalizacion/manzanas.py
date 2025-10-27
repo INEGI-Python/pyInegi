@@ -3,7 +3,7 @@ import os
 import geopandas as geo
 from time import time as t
 from shapely.ops import unary_union,polygonize
-from puntosColineares import remove_colinear_points
+from .puntosColineares import remove_colinear_points
 from shapely.geometry import MultiPolygon, Polygon
 
 def feat(gdb,_gdf,nom):
@@ -93,20 +93,20 @@ def quitaPrivadas(a):
 		print("Generando vista previa en web... Esto puede demorar unos minutos dependiendo la cantidad de datos...")
 		shape(poligonos_gdf,pro)
 		shape(original,ori)
-		from   webMap import WebMAP
+		from  .webMap import WebMAP
 		WebMAP(datos=[ori,pro],tipos=["POLYGON","POLYGON"],names=["Poligonos Originales","Poligonos Procesados"],estilo=estilo(["gray-white","green-black"]),web=1)
 		os.system(f"rm {pro} {pro[:-4]+'.dbf'} {pro[:-4]+'.shx'} {pro[:-4]+'.prj'} {ori} {ori[:-4]+'.dbf'} {ori[:-4]+'.shx'} {ori[:-4]+'.prj'}")
 
 
 
 if __name__ == "__main__":
-	args = argparse.ArgumentParser(description="Generaliza poligonos quitando espacios que se adentran, como por ejemplo privadas en manzanas. ")
+	args = argparse.ArgumentParser(description="Generaliza polígonos quitando espacios que se adentran, como por ejemplo privadas en manzanas. ")
 	args.add_argument("file",type=str,help="Ruta absoluta o relativa del feature class a procesar")
 	args.add_argument("dist",type=int,help="Ancho máximo en metros del espacio a quitar.")
 	args.add_argument("out",type=str, help="Nombre del feature class de salida.")
 	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
-	args.add_argument("angulo",type=int ,nargs="?", default=0, help="Medida minima de los angulos en grados de tipo entrero, formados en cada vertice, entre 0° y 180° . DEFAULT 0")
-	args.add_argument("prev",type=int,nargs="?",default=0,help="Si es 1, muestra una vista previa de los poligonos procesados. DEFAULT 0")
+	args.add_argument("angulo",type=int ,nargs="?", default=0, help="Medida minima de los ángulos en grados de tipo entero, formados en cada vertice, entre 0° y 180° . DEFAULT 0")
+	args.add_argument("prev",type=int,nargs="?",default=0,help="1 = Muestra una vista previa en windows de escritorio.  2 = Muestra una vista previa de los poligonos procesados en un mapa Web.    DEFAULT 0")
 	args = args.parse_args()
 	quitaPrivadas(args)        
 
