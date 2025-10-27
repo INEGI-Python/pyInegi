@@ -8,6 +8,7 @@
 /.myVenv
 /.myVenv311
 /.myVenvPro
+/.pyQgisV
 /MOPIGMA.gdb
 *.pyc
 /__pycache__

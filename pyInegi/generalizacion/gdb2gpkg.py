@@ -11,11 +11,14 @@ def gdb2gpkg(gdb_path, gpks_path,cond,tif):
 	layers = fiona.listlayers(gdb_path)
 	for layer in layers:
 		with fiona.open(gdb_path,'r',layer=layer) as capaOrigen:
-			perfil = capaOrigen.profile
-			perfil['driver']='GPKG'
-			with fiona.open(gpks_path,'w',**perfil,layer=layer) as  capaDest:
-				for elemento in capaOrigen:
-					capaDest.write(elemento)
+			if capaOrigen.__len__()>0:
+				perfil = capaOrigen.profile
+				perfil['driver']='GPKG'
+				with fiona.open(gpks_path,'w',**perfil,layer=layer) as  capaDest:
+					for elemento in capaOrigen:
+						capaDest.write(elemento)
+			else:
+				print(f"Se omitio la capa {layer} porque no tiene datos")
 	print(f"Capas  copiadas con exito a {gpks_path.split('/')[-2]}" )
 	if cond is not None:
 		print("... agregando el raster de batimetria...")
