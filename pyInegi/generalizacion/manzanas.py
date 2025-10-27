@@ -1,14 +1,32 @@
 import argparse
+import os
 import geopandas as geo
 from time import time as t
 from shapely.ops import unary_union,polygonize
-from .puntosColineares import remove_colinear_points
+from puntosColineares import remove_colinear_points
+from shapely.geometry import MultiPolygon, Polygon
 
 def feat(gdb,_gdf,nom):
 	_gdf.to_file(gdb,layer=nom, driver="OpenFileGDB")
+def shape(_gdf,nom):
+	_gdf.to_file(nom,driver="ESRI Shapefile")
+def estilo(colores):
+	return [dict(fillColor=c.split("-")[0],color=c.split("-")[1]) for c in colores]
 
-def generaTriangulos_lineasFuera(geom,dist,crs,i):
+def multi_to_poly(geom):
+	if geom is None or geom.is_empty:
+		return geom
+	if isinstance(geom, MultiPolygon):
+		try:
+			return max(geom.geoms, key=lambda p: p.area)
+		except Exception:
+			return unary_union(geom)
+	return geom
+
+
+def generaTriangulos_lineasFuera(original,geom,dist,crs,i):
 	gdf=geo.GeoDataFrame(geometry= [geom],crs=crs)
+	gdf_original=geo.GeoDataFrame(geometry= [original],crs=crs)
 	triangulos = gdf.delaunay_triangles(tolerance=0,only_edges=True)
 	contorno = gdf.boundary
 	triangulos_outside = triangulos[~triangulos.within(gdf.union_all())]
@@ -16,7 +34,7 @@ def generaTriangulos_lineasFuera(geom,dist,crs,i):
 	mask_not_within_contorno = ~gdf_outside.geometry.apply(lambda line: any(line.within(bound) for bound in contorno))
 	mask_length_less_Xm = gdf_outside.geometry.length < dist
 	filtered_lines = gdf_outside[mask_not_within_contorno & mask_length_less_Xm]
-	all_lines = list(filtered_lines.geometry) + list(contorno)
+	all_lines = list(filtered_lines.geometry) + list(gdf_original.boundary)
 	merged_lines = unary_union(all_lines)
 	polygons = list(polygonize(merged_lines))
 	polygons = [unary_union(polygons)]
@@ -36,13 +54,17 @@ def quitaPrivadas(a):
 	gdf["OBJECTID"] = gdf.index + 1
 	gdf.set_index("OBJECTID",inplace=True)
 	gdf.loc[:, "geometry"] = gdf.geometry.buffer(0)
+	n_multi = gdf.geometry.apply(lambda g: isinstance(g, MultiPolygon)).sum()
+	if n_multi > 0:
+		gdf.loc[:, "geometry"] = gdf.geometry.apply(multi_to_poly)
+	original = gdf.copy()
 	campos = [c for c in gdf.columns if c not in ["OBJECTID_1","geometry","objectid","Shape_Length","Shape_Area"]]
 	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
 	if a.angulo>0:
 		gdf.loc[:,"geometry"] = gdf.geometry.apply(remove_colinear_points,angulo=a.angulo)
 		feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
 	print("Generalizando polígonos...")
-	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
+	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(original.loc[i,"geometry"],gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
 
 	print("Proceso finalizado. Tiempo: %.3f seg" % (t()-ini))
 	print(f"Guardando resultados en la geodatabase...")
@@ -66,6 +88,14 @@ def quitaPrivadas(a):
 		gdf.plot(facecolor="none",edgecolor="red")
 		plt.title("Poligonos originales")
 		plt.show()
+	elif a.prev==2:
+		ori,pro = "ori_tmp.shp","pro_tmp.shp"
+		print("Generando vista previa en web... Esto puede demorar unos minutos dependiendo la cantidad de datos...")
+		shape(poligonos_gdf,pro)
+		shape(original,ori)
+		from   webMap import WebMAP
+		WebMAP(datos=[ori,pro],tipos=["POLYGON","POLYGON"],names=["Poligonos Originales","Poligonos Procesados"],estilo=estilo(["gray-white","green-black"]),web=1)
+		os.system(f"rm {pro} {pro[:-4]+'.dbf'} {pro[:-4]+'.shx'} {pro[:-4]+'.prj'} {ori} {ori[:-4]+'.dbf'} {ori[:-4]+'.shx'} {ori[:-4]+'.prj'}")
 
 
 

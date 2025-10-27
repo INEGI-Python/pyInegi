@@ -10,10 +10,10 @@
 				"cwd": "${workspaceFolder}"
 			},
 			"problemMatcher": [],
-			"command": "%e%", 
+			"command": "%e%",
 			"group": {
 				"kind": "build",
-				"isDefault": true	
+				"isDefault": true
 			},
 			"presentation": {
 				"echo": true,
@@ -29,3 +29,4 @@
 		}
 	]
 }
+

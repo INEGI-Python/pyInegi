@@ -12,7 +12,7 @@ def WebMAP(**param):
 		CRS = tmp.crs.to_string()
 		# Configrar los estilos según el tipo de geometría
 		if param["tipos"][i].upper() == "POINT":
-			style = dict(radius=2,fillOpacity=0.7)
+			style = dict(radius=1,fillOpacity=0.5)
 			for e in param["estilo"][i].keys():
 				style[e]=param["estilo"][i][e]
 		else:  # Para LINESTRING, POLYGON, etc.
@@ -23,13 +23,14 @@ def WebMAP(**param):
 		capas.append(tmp.explore(
 			m=capas[-1],
 			name=param["names"][i],
-			tooltip=True,
+			tooltip=False,
+			popup=True,
 			style_kwds=style
 		))
 	fol.TileLayer("OpenStreetMap",show=True).add_to(capas[-1])
 	fol.LayerControl().add_to(capas[-1])
 	capas[-1].show_in_browser() if param['web']==1 else capas[-1]
-
+	return True
     
 
 if __name__ == "__main__":

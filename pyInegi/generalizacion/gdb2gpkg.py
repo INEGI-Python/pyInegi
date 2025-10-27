@@ -3,6 +3,7 @@ import os,shutil
 import   pandas as pan
 import argparse
 import fiona
+import zipfile
 
 def gdb2gpkg(gdb_path, gpks_path,cond,tif):
 	if os.path.exists(gpks_path):
@@ -10,15 +11,19 @@ def gdb2gpkg(gdb_path, gpks_path,cond,tif):
 
 	layers = fiona.listlayers(gdb_path)
 	for layer in layers:
+		print(f"******************************       {layer}      *******************************************",end="\n\n")
 		with fiona.open(gdb_path,'r',layer=layer) as capaOrigen:
-			if capaOrigen.__len__()>0:
-				perfil = capaOrigen.profile
-				perfil['driver']='GPKG'
-				with fiona.open(gpks_path,'w',**perfil,layer=layer) as  capaDest:
-					for elemento in capaOrigen:
-						capaDest.write(elemento)
-			else:
-				print(f"Se omitio la capa {layer} porque no tiene datos")
+			print(capaOrigen.profile)
+			perfil = capaOrigen.profile
+			perfil['driver']='GPKG'
+			print(perfil)
+			with fiona.open(gpks_path,'w',**perfil,layer=layer) as  capaDest:
+				for elemento in capaOrigen:
+					capaDest.write(elemento)
+				capaDest.close()
+		with fiona.open(gpks_path,'r',layer=layer) as geopaquete:
+			print(geopaquete.profile)
+			geopaquete.close()
 	print(f"Capas  copiadas con exito a {gpks_path.split('/')[-2]}" )
 	if cond is not None:
 		print("... agregando el raster de batimetria...")
@@ -41,6 +46,7 @@ def copy_without_gdb(src, dst,tmpl):
 			orient = str(excel[excel['NOMGEO']==ent]["Orientacion"].values[:])[2:-2]
 			print(f"{ent}  -  {orient}")
 			shutil.copy2(f"{tmpl}/{orient}.qgz",f"{dst_dir}/{ent}.qgz")
+	
 			shutil.copy2(f"{root}/INEGI_Logotipo_5.jpg",f"{dst_dir}/INEGI_Logotipo_5.jpg")
 			bati = [f for f in files if f.endswith(".tif")]
 			bati = bati[0] if len(bati)>0 else None
