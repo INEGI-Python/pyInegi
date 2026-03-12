@@ -1,0 +1,122 @@
+import argparse
+import os
+import geopandas as geo
+from time import time as t
+from shapely.ops import unary_union,polygonize
+from .puntosColineares import remove_colinear_points
+from shapely.geometry import MultiPolygon, Polygon
+
+def feat(gdb,_gdf,nom):
+	_gdf.to_file(gdb,layer=nom, driver="OpenFileGDB")
+def shape(_gdf,nom):
+	_gdf.to_file(nom,driver="ESRI Shapefile")
+def estilo(colores):
+	return [dict(fillColor=c.split("-")[0],color=c.split("-")[1]) for c in colores]
+
+def multi_to_poly(geom):
+	if geom is None or geom.is_empty:
+		return geom
+	if isinstance(geom, MultiPolygon):
+		try:
+			return max(geom.geoms, key=lambda p: p.area)
+		except Exception:
+			return unary_union(geom)
+	return geom
+
+
+def generaTriangulos_lineasFuera(original,geom,dist,crs,i):
+	gdf=geo.GeoDataFrame(geometry= [geom],crs=crs)
+	gdf_original=geo.GeoDataFrame(geometry= [original],crs=crs)
+	triangulos = gdf.delaunay_triangles(tolerance=0,only_edges=True)
+	contorno = gdf.boundary
+	triangulos_outside = triangulos[~triangulos.within(gdf.union_all())]
+	gdf_outside = geo.GeoDataFrame(geometry=triangulos_outside, crs=crs)
+	mask_not_within_contorno = ~gdf_outside.geometry.apply(lambda line: any(line.within(bound) for bound in contorno))
+	mask_length_less_Xm = gdf_outside.geometry.length < dist
+	filtered_lines = gdf_outside[mask_not_within_contorno & mask_length_less_Xm]
+	all_lines = list(filtered_lines.geometry) + list(gdf_original.boundary)
+	merged_lines = unary_union(all_lines)
+	polygons = list(polygonize(merged_lines))
+	polygons = [unary_union(polygons)]
+	return polygons
+
+def quitaPrivadas(a):
+	gdf = None
+	fuente=a.file.split("/" or "\\")
+	print("Leyendo capa...")
+	ini = t()
+	if fuente[-2].split(".")[-1] != "gdb":
+		raise ValueError("El archivo debe ser un feature class dentro de un geodatabase")
+
+	gdb =a.file[0:len(a.file)-len(fuente[-1])-1]
+	print(f"Geodatabase: {gdb}")
+	gdf = geo.read_file(gdb,layer=fuente[-1],rows=a.rows if a.rows>0 else None)
+	gdf["OBJECTID"] = gdf.index + 1
+	gdf.set_index("OBJECTID",inplace=True)
+	gdf.loc[:, "geometry"] = gdf.geometry.buffer(0)
+	n_multi = gdf.geometry.apply(lambda g: isinstance(g, MultiPolygon)).sum()
+	if n_multi > 0:
+		gdf.loc[:, "geometry"] = gdf.geometry.apply(multi_to_poly)
+	original = gdf.copy()
+	campos = [c for c in gdf.columns if c not in ["OBJECTID_1","geometry","objectid","Shape_Length","Shape_Area"]]
+	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
+	if a.angulo>0:
+		gdf.loc[:,"geometry"] = gdf.geometry.apply(remove_colinear_points,angulo=a.angulo)
+		feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
+	print("Generalizando polígonos...")
+	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(original.loc[i,"geometry"],gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
+
+	print("Proceso finalizado. Tiempo: %.3f seg" % (t()-ini))
+	print(f"Guardando resultados en la geodatabase...")
+	poligonos_gdf = geo.GeoDataFrame(
+		data=[{"OBJECTID": i["id"]} for i in poligonos],
+		geometry=[i["geom"][0] for i in poligonos],
+		crs=gdf.crs
+	)
+	poligonos_gdf.set_index("OBJECTID",inplace=True)
+
+	for col in campos:
+		poligonos_gdf[col] = None
+		poligonos_gdf.loc[:,col]=gdf.loc[:,col]
+	feat(gdb,poligonos_gdf,a.out)
+	if a.prev==1:
+		import matplotlib
+		matplotlib.use("TkAgg") 
+		import matplotlib.pyplot as plt
+		poligonos_gdf.plot(facecolor="none",edgecolor="blue")
+		plt.title("Poligonos procesados")
+		gdf.plot(facecolor="none",edgecolor="red")
+		plt.title("Poligonos originales")
+		plt.show()
+	elif a.prev==2:
+		ori,pro = "ori_tmp.shp","pro_tmp.shp"
+		print("Generando vista previa en web... Esto puede demorar unos minutos dependiendo la cantidad de datos...")
+		shape(poligonos_gdf,pro)
+		shape(original,ori)
+		from  .webMap import WebMAP
+		WebMAP(datos=[ori,pro],tipos=["POLYGON","POLYGON"],names=["Poligonos Originales","Poligonos Procesados"],estilo=estilo(["gray-white","green-black"]),web=1)
+		os.system(f"rm {pro} {pro[:-4]+'.dbf'} {pro[:-4]+'.shx'} {pro[:-4]+'.prj'} {ori} {ori[:-4]+'.dbf'} {ori[:-4]+'.shx'} {ori[:-4]+'.prj'}")
+
+
+
+if __name__ == "__main__":
+	args = argparse.ArgumentParser(description="Generaliza polígonos quitando espacios que se adentran, como por ejemplo privadas en manzanas. ")
+	args.add_argument("file",type=str,help="Ruta absoluta o relativa del feature class a procesar")
+	args.add_argument("dist",type=int,help="Ancho máximo en metros del espacio a quitar.")
+	args.add_argument("out",type=str, help="Nombre del feature class de salida.")
+	args.add_argument("rows",type=int,nargs="?",default=-1,help="Cantidad de registros a usar. DEFAULT todos")
+	args.add_argument("angulo",type=int ,nargs="?", default=0, help="Medida minima de los ángulos en grados de tipo entero, formados en cada vertice, entre 0° y 180° . DEFAULT 0")
+	args.add_argument("prev",type=int,nargs="?",default=0,help="1 = Muestra una vista previa en windows de escritorio.  2 = Muestra una vista previa de los poligonos procesados en un mapa Web.    DEFAULT 0")
+	args = args.parse_args()
+	quitaPrivadas(args)        
+
+
+
+	# Ejemplo de uso por consola:
+	# python manzanas.py "DatosEjemplo/urbana.gdb/mzas" 13 "manzanas_sin_privadas" 100 1	
+	# Donde:
+	# "DatosEjemplo/urbana.gdb/mzas" es la ruta al feature class de manzanas
+	# 13 es la distancia máxima en metros de la privada a quitar
+	# "manzanas_sin_privadas" es el nombre del feature class de salida
+	# 100 es la cantidad de registros a usar (opcional)
+	# 1 es el indicador para mostrar una vista previa (opcional)	

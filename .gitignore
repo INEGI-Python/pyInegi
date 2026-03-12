@@ -1,10 +1,14 @@
 /DatosSalida
 /DatosEntrada
 /datos
+/gdb_2_gpkg
+/datosEjemplo
 /pyInegi/datos
 /RESULTADOS
 /.myVenv
-/.myVenv2
+/.myVenv311
+/.myVenvPro
+/.pyQgisV
 /MOPIGMA.gdb
 *.pyc
 /__pycache__

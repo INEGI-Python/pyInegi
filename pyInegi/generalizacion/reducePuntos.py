@@ -7,7 +7,7 @@ from ..basico.funciones import imp,fechaHora
 
 
 def crearGpos(_dataF,CRS,distancia):
-	imp("Buscando Localidades Cercanas para agruparlas")
+	imp("Buscando puntos cercanos para agruparlos")
 	bu = _dataF.buffer(distancia/2)
 	buDF = gpd.GeoDataFrame(geometry=bu,crs=CRS)
 	uni =bu.union_all()
@@ -19,8 +19,8 @@ def crearGpos(_dataF,CRS,distancia):
 	gpos.set_index("id")
 	cont = gpos.count(numeric_only=True)['id']
 	agrupados = _dataF.sjoin(gpos,how="inner",predicate='intersects')
-	agrupados["gpo"]=agrupados['id']
-	agrupados = agrupados.drop(columns=['index_right0','index_right1','id'])
+	agrupados["gpo"]=agrupados['id_right']
+	agrupados = agrupados.drop(columns=['index_right0','index_right1','id_right'])
 	imp("Total de Grupos generados: %d" % cont)
 	porGPO = agrupados.groupby(by="gpo").groups
 	return gpos,agrupados,porGPO
@@ -58,7 +58,9 @@ def ReducePuntos(**params):
 	orden = [int(n.split(":")[1])==1  for n in camp]
 	distancia = params['dist']
 	ver = params['ver']
-
+	tmp = gdb.split("/")[-1]
+	tipo = tmp.split(".")[-1]
+	tipo = "shp" if tipo=="gdb" else tipo 
 	t1 = t()
 	_dataF = gpd.read_file(gdb,layer=feat) if gdb[-3:]=="gdb" else   gpd.read_file(gdb)
 	_dataF["gpo"]=0
@@ -94,9 +96,9 @@ def ReducePuntos(**params):
 		if _d not in os.listdir(): 
 			os.mkdir(_d)
 		os.chdir(_d)
-	archivo=f"{fechaHora()}.shp"
+	archivo=f"{fechaHora()}.{tipo}"
 	agrupados.to_file(archivo,encoding="UTF-8")
-	imp(f"{os.getcwd().replace("\\","/")}/{archivo}")
+	imp(os.getcwd().replace("\\","/")+"/"+archivo)
 	os.chdir(miDir)
 	if ver==1:
 		DF_visi,DF_ocul,geomDF = Generar_Plot(agrupados, distancia, CRS) 
@@ -117,7 +119,8 @@ if __name__ == "__main__":
 		import fiona
 		print(eval(args.FEAT))
 	else:
-		ReducePuntos(args)
+		#ReducePuntos(args)
+		ReducePuntos(gdb=args.gdb,feat=args.feat,camp=args.camp.split(","),dist=args.dist,ver=args.ver)
 		#inicio_rp(gdb=args.GDB,feat=args.FEAT,camp=args.CAMP.split(","),dist=args.DIST,ver=args.VER)
 #else:
 #   main(gdb='datos/prueba2.shp', feat='_', camp="Jerarquia:1,geografico:1,num_hab:0".split(","),dist=1500,ver=1) 
