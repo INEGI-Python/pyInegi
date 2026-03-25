@@ -8,7 +8,7 @@ def WebMAP(**param):
 	capas = [None]
 	for i in range(len(param['datos'])):
 		style=dict()
-		tmp = geo.read_file(param["datos"][i],rows=param["rows"] if param.get("rows") else None)
+		tmp = geo.read_file(param["datos"][i][0],layer=param["datos"][i][1],rows=param["rows"] if param.get("rows") else None)
 		CRS = tmp.crs.to_string()
 		# Configrar los estilos según el tipo de geometría
 		if param["tipos"][i].upper() == "POINT":

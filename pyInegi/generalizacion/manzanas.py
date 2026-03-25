@@ -42,15 +42,18 @@ def generaTriangulos_lineasFuera(original,geom,dist,crs,i):
 
 def quitaPrivadas(a):
 	gdf = None
+	shp=a.file
 	fuente=a.file.split("/" or "\\")
 	print("Leyendo capa...")
 	ini = t()
-	if fuente[-2].split(".")[-1] != "gdb":
-		raise ValueError("El archivo debe ser un feature class dentro de un geodatabase")
+	#if fuente[-2].split(".")[-1] != "gdb":
+		#raise ValueError("El archivo debe ser un feature class dentro de un geodatabase")
 
-	gdb =a.file[0:len(a.file)-len(fuente[-1])-1]
-	print(f"Geodatabase: {gdb}")
-	gdf = geo.read_file(gdb,layer=fuente[-1],rows=a.rows if a.rows>0 else None)
+	#gdb =a.file[0:len(a.file)-len(fuente[-1])-1]
+
+	print(f"Geodatabase: {shp}")
+	gdf =geo.read_file(shp,rows=a.rows if a.rows>0 else None)
+	#gdf = geo.read_file(gdb,layer=fuente[-1],rows=a.rows if a.rows>0 else None)
 	gdf["OBJECTID"] = gdf.index + 1
 	gdf.set_index("OBJECTID",inplace=True)
 	gdf.loc[:, "geometry"] = gdf.geometry.buffer(0)
@@ -62,7 +65,7 @@ def quitaPrivadas(a):
 	print("Elimina ángulos colineales de las geometrías de la capa a procesar...")
 	if a.angulo>0:
 		gdf.loc[:,"geometry"] = gdf.geometry.apply(remove_colinear_points,angulo=a.angulo)
-		feat(gdb,gdf,f"Simplificado_{a.angulo}_grados")
+		feat(shp,gdf,f"Simplificado_{a.angulo}_grados")
 	print("Generalizando polígonos...")
 	poligonos = [ {"id":i,"geom":generaTriangulos_lineasFuera(original.loc[i,"geometry"],gdf.loc[i,"geometry"],a.dist,gdf.crs,i)}    for i in gdf.index]
 
@@ -78,7 +81,7 @@ def quitaPrivadas(a):
 	for col in campos:
 		poligonos_gdf[col] = None
 		poligonos_gdf.loc[:,col]=gdf.loc[:,col]
-	feat(gdb,poligonos_gdf,a.out)
+	feat(shp,poligonos_gdf,a.out)
 	if a.prev==1:
 		import matplotlib
 		matplotlib.use("TkAgg") 
