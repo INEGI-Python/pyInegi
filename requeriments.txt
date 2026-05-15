@@ -1,5 +1,3 @@
-gdal
-osgeo
 numpy
 matplotlib
 folium
