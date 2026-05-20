@@ -1,7 +1,7 @@
 
 import numpy as np
 from scipy.spatial import distance,Voronoi
-from shapely.geometry import Polygon,LineString,Point
+from shapely.geometry import LineString,Point
 import geopandas as geo
 import matplotlib.pyplot as plt
 from pyInegi.generalizacion import webMap

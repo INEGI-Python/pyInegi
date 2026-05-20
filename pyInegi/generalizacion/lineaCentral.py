@@ -6,8 +6,7 @@ import numpy as np
 from multiprocessing import Pool, freeze_support
 import json
 import argparse
-from shapely import LineString,voronoi_polygons,Polygon
-from shapely.geometry import GeometryCollection,MultiLineString
+from shapely.geometry import GeometryCollection,MultiLineString,  LineString,Polygon
 from ..basico.funciones import interseccion,renombrar
 import matplotlib.pyplot as plt
 

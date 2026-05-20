@@ -2,7 +2,7 @@ import os
 import contextlib
 from folium import Polygon
 import rtree,json
-from shapely import GeometryCollection, LineString, MultiLineString, MultiPoint, MultiPolygon, Point
+from shapely.geometry import GeometryCollection, LineString, MultiLineString, MultiPoint, MultiPolygon, Point
 import numpy as np
 from time import time as t,localtime as lc
 

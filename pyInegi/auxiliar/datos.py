@@ -1,11 +1,16 @@
+class Datos:
+   def __init__(self):
+      self.files = None
 
-class paramMzas:
-   def __init__(self,file,dist,out,rows=-1,prev=0):
-      self.file=file
-      self.dist=dist
-      self.out=out
-      self.rows=rows
-      self.prev=prev
+   def ver(self):
+      import os
+      ruta = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'DatosEntrada')
+      self.files = os.listdir(ruta)
+      return self.files
+
+
+
+
 
 def features(dato):
    return {"mzas": "https://github.com/INEGI-Python/pyInegi/raw/d248d3a43c65915c7a3e64396cd6da57c65ad093/datosEjemplo/cartografiaUrbana.gdb",
